@@ -2,7 +2,7 @@
 # Qt6
 #-----------------------------------------------------------------------------
 
-set(QT_COMPONENTS Core Gui Widgets Sql Qml)
+set(QT_COMPONENTS Core Gui Widgets Sql Qml Network)
 
 if(WIN32)
     execute_process(COMMAND ${CHOCO} install qt6-base-dev -y --version 6.4.2 --no-progress --params="/InstallationPath C:/Qt")
