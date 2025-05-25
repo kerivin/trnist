@@ -3,10 +3,24 @@ name: Build
 on: [push, pull_request]
 
 jobs:
+  get-project-name:
+    runs-on: ubuntu-latest
+    outputs:
+      project_name: ${{ steps.extract_name.outputs.project_name }}
+    steps:
+    - uses: actions/checkout@v4
+    - name: Extract project name
+      id: extract_name
+      run: |
+        PROJECT_NAME=$(grep -m1 '^project(' CMakeLists.txt | cut -d'(' -f2 | cut -d' ' -f1 | tr -d ')')
+        echo "project_name=${PROJECT_NAME}" >> $GITHUB_OUTPUT
+
   linux:
+    needs: get-project-name
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v4
+    - uses: lukka/get-cmake@latest
 
     - name: Configure
       run: cmake -B build -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=bin -GNinja
@@ -24,18 +38,20 @@ jobs:
     - name: Package tar.gz
       run: |
         cd bin
-        tar czf ../${{ vars.PROJECT_NAME }}-linux.tar.gz .
+        tar czf ../${{ needs.get-project-name.outputs.project_name }}-linux.tar.gz .
       
     - name: Upload .tar.gz
       uses: actions/upload-artifact@v4
       with:
-        name: ${{ vars.PROJECT_NAME }}-linux.tar.gz
-        path: ${{ vars.PROJECT_NAME }}-linux.tar.gz
+        name: ${{ needs.get-project-name.outputs.project_name }}-linux.tar.gz
+        path: ${{ needs.get-project-name.outputs.project_name }}-linux.tar.gz
 
   macOS:
+    needs: get-project-name
     runs-on: macos-latest
     steps:
     - uses: actions/checkout@v4
+    - uses: lukka/get-cmake@latest
 
     - name: Configure
       run: cmake -B build -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=bin -GNinja
@@ -54,33 +70,35 @@ jobs:
       run: |
         cd bin
         hdiutil create \
-          -volname "${{ vars.PROJECT_NAME }}" \
+          -volname "${{ needs.get-project-name.outputs.project_name }}" \
           -srcfolder . \
           -ov \
           -format UDZO \
-          ../${{ vars.PROJECT_NAME }}-macOS.dmg
+          ../${{ needs.get-project-name.outputs.project_name }}-macOS.dmg
 
     - name: Package tar.gz
       run: |
         cd bin
-        tar czf ../${{ vars.PROJECT_NAME }}-macOS.tar.gz .
+        tar czf ../${{ needs.get-project-name.outputs.project_name }}-macOS.tar.gz .
 
     - name: Upload .dmg
       uses: actions/upload-artifact@v4
       with:
-        name: ${{ vars.PROJECT_NAME }}-macOS.dmg
-        path: ${{ vars.PROJECT_NAME }}-macOS.dmg
+        name: ${{ needs.get-project-name.outputs.project_name }}-macOS.dmg
+        path: ${{ needs.get-project-name.outputs.project_name }}-macOS.dmg
 
     - name: Upload .tar.gz
       uses: actions/upload-artifact@v4
       with:
-        name: ${{ vars.PROJECT_NAME }}-macOS.tar.gz
-        path: ${{ vars.PROJECT_NAME }}-macOS.tar.gz
+        name: ${{ needs.get-project-name.outputs.project_name }}-macOS.tar.gz
+        path: ${{ needs.get-project-name.outputs.project_name }}-macOS.tar.gz
 
   windows:
+    needs: get-project-name
     runs-on: windows-latest
     steps:
     - uses: actions/checkout@v4
+    - uses: lukka/get-cmake@latest
 
     - name: Configure
       run: cmake -B build -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=bin -GNinja
@@ -117,10 +135,10 @@ jobs:
     - name: Package zip
       run: |
         cd bin
-        7z a -tzip ../${{ vars.PROJECT_NAME }}-windows.zip *
+        7z a -tzip ../${{ needs.get-project-name.outputs.project_name }}-windows.zip *
       
     - name: Upload zip
       uses: actions/upload-artifact@v4
       with:
-        name: ${{ vars.PROJECT_NAME }}-windows.zip
-        path: ${{ vars.PROJECT_NAME }}-windows.zip
+        name: ${{ needs.get-project-name.outputs.project_name }}-windows.zip
+        path: ${{ needs.get-project-name.outputs.project_name }}-windows.zip

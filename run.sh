@@ -1,3 +1,3 @@
 cmake --build build
 cmake --install build
-./build/bin/tr-nist
+./tmp/trnist
