@@ -7,8 +7,8 @@ class QNetworkAccessManager;
 
 namespace trnist::core::language
 {
-	class Definition;
-	class DictionaryContext;
+	struct Definition;
+	struct DictionaryContext;
 
 	class ApiDictionary : public IDictionary
 	{

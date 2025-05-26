@@ -6,7 +6,7 @@ class QTextEdit;
 
 namespace trnist::core::language
 {
-	class Definition;
+	struct Definition;
 	class IDictionary;
 }
 

@@ -6,7 +6,7 @@
 namespace trnist::core::language
 {
 	class DictionaryContext;
-	class Definition;
+	struct Definition;
 
 	class IDictionary : public QObject
 	{
