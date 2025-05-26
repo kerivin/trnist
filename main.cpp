@@ -4,8 +4,10 @@
 #include <QMessageBox>
 #include <QTextEdit>
 #include <QSplitter>
-#include "ui/dictionary_widget.h"
-#include "ui/translation_widget.h"
+#include "ui/widget/dictionary.h"
+#include "ui/widget/translation.h"
+#include "ui/widget/structure.h"
+#include "ui/widget/memory.h"
 #include "pybind.h"
 #include "utils/embed_modules.h"
 
@@ -42,9 +44,13 @@ int main(int argc, char* argv[])
 		splitter->addWidget(right_edit);
 		main_window.setCentralWidget(splitter);
 
-		trnist::ui::TranslationWidget* translation_widget = new trnist::ui::TranslationWidget(&main_window);
-		trnist::ui::DictionaryWidget* dictionary_widget = new trnist::ui::DictionaryWidget(&main_window);
+		trnist::ui::widget::Structure* structure_widget = new trnist::ui::widget::Structure(&main_window);
+		trnist::ui::widget::Memory* memory_widget = new trnist::ui::widget::Memory(&main_window);
+		main_window.addDockWidget(Qt::DockWidgetArea::LeftDockWidgetArea, structure_widget);
+		main_window.addDockWidget(Qt::DockWidgetArea::LeftDockWidgetArea, memory_widget);
 
+		trnist::ui::widget::Translation* translation_widget = new trnist::ui::widget::Translation(&main_window);
+		trnist::ui::widget::Dictionary* dictionary_widget = new trnist::ui::widget::Dictionary(&main_window);
 		main_window.addDockWidget(Qt::DockWidgetArea::RightDockWidgetArea, translation_widget);
 		main_window.addDockWidget(Qt::DockWidgetArea::RightDockWidgetArea, dictionary_widget);
 

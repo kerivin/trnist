@@ -9,13 +9,13 @@ namespace trnist::core::language
 	class ITranslator;
 }
 
-namespace trnist::ui
+namespace trnist::ui::widget
 {
-	class TranslationWidget : public QDockWidget
+	class Translation : public QDockWidget
 	{
 		Q_OBJECT
 	public:
-		TranslationWidget(QWidget* parent = nullptr);
+		Translation(QWidget* parent = nullptr);
 		void update();
 
 	private Q_SLOTS:

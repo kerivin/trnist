@@ -10,13 +10,13 @@ namespace trnist::core::language
 	class IDictionary;
 }
 
-namespace trnist::ui
+namespace trnist::ui::widget
 {
-	class DictionaryWidget : public QDockWidget
+	class Dictionary : public QDockWidget
 	{
 		Q_OBJECT
 	public:
-		DictionaryWidget(QWidget* parent = nullptr);
+		Dictionary(QWidget* parent = nullptr);
 		void update();
 
 	private Q_SLOTS:
