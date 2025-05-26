@@ -27,7 +27,8 @@
                 "/usr/include/x86_64-linux-gnu/qt6/QtCore",
                 "/usr/include/python3.12",
                 "${workspaceFolder}/build/_deps/pybind11-src/include",
-                "/usr/include/x86_64-linux-gnu/qt6/QtQml"
+                "/usr/include/x86_64-linux-gnu/qt6/QtQml",
+                "/usr/include/x86_64-linux-gnu/qt6/QtNetwork"
             ],
             "defines": [
                 "QT_CORE_LIB",

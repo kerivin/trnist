@@ -80,6 +80,11 @@
 		"csignal": "cpp",
 		"regex": "cpp",
 		"*.in": "cpp",
-		"qvariant": "cpp"
+		"qvariant": "cpp",
+		"qurl": "cpp",
+		"qdockwidget": "cpp",
+		"qjsondocument": "cpp",
+		"qobject": "cpp",
+		"qtextedit": "cpp"
 	}
 }

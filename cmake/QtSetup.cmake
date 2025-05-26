@@ -35,4 +35,5 @@ else()
 endif()
 
 list(APPEND CMAKE_PREFIX_PATH ${QT_DIR})
+set(CMAKE_AUTOMOC ON)
 find_package(Qt6 REQUIRED COMPONENTS ${QT_COMPONENTS})

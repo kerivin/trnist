@@ -8,6 +8,7 @@ file(GLOB_RECURSE HEADERS "include/*.h")
 qt_add_executable(${PROJECT_NAME} WIN32
 	main.cpp
 	${SOURCES}
+	${HEADERS}
 )
 
 target_include_directories(${PROJECT_NAME}
