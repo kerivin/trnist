@@ -29,44 +29,55 @@ install(TARGETS ${PROJECT_NAME}
 		ARCHIVE DESTINATION .)
 
 install(
-    DIRECTORY
-        ${VENV_SITE_PACKAGES}/
-    DESTINATION
-        ${PYTHON_MODULES_DIR}
-    PATTERN "__pycache__" EXCLUDE
+	DIRECTORY
+		${VENV_SITE_PACKAGES}/
+	DESTINATION
+		${PYTHON_MODULES_DIR}
+	PATTERN "__pycache__" EXCLUDE
 	PATTERN "*.pyc" EXCLUDE
-    PATTERN "*.dist-info" EXCLUDE
-    PATTERN "*.egg-info" EXCLUDE
+	PATTERN "*.dist-info" EXCLUDE
+	PATTERN "*.egg-info" EXCLUDE
 )
 
-if(WIN32)
-	if(QT_PLATFORMS_DIR)
-		install(DIRECTORY ${QT_PLATFORMS_DIR}/
-				DESTINATION platforms
-				FILES_MATCHING PATTERN "*.dll")
-	endif()
-	if(Qt6_core_location)
-		foreach(component IN LISTS QT_COMPONENTS)
-			if(TARGET Qt6::${component})
-				install(FILES "${QT_BIN_DIR}/Qt6${component}.dll"
-						DESTINATION .)
-				if(CMAKE_BUILD_TYPE STREQUAL "Debug")
-					install(FILES "${QT_BIN_DIR}/Qt6${component}d.dll"
-							DESTINATION .)
-				endif()
-			endif()
-		endforeach()
-	endif()
-endif()
+install(FILES "${LO_LIBS}" DESTINATION .)
+install(FILES "${LOK_LIBRARY}" DESTINATION .)
 
-if(UNIX AND QT_PLATFORMS_DIR)
+if (QT_PLATFORMS_DIR)
 	install(DIRECTORY ${QT_PLATFORMS_DIR}/
 			DESTINATION platforms
 			FILES_MATCHING PATTERN "*${PLATFORM_LIB}")
 endif()
 
-include(InstallRequiredSystemLibraries)
+foreach(component IN LISTS QT_COMPONENTS)
+    if(TARGET Qt6::${component})
+        get_target_property(Qt6_lib Qt6::${component} IMPORTED_LOCATION)
+        if(Qt6_lib AND EXISTS "${Qt6_lib}")
+            if(WIN32)
+                install(FILES "${Qt6_lib}" DESTINATION .)
+                if(CMAKE_BUILD_TYPE STREQUAL "Debug")
+                    string(REPLACE ".dll" "d.dll" debug_lib "${Qt6_lib}")
+                    if(EXISTS "${debug_lib}")
+                        install(FILES "${debug_lib}" DESTINATION .)
+                    endif()
+                endif()
+            
+            elseif(APPLE)
+                if(Qt6_lib MATCHES "\\.framework")
+                    install(FILES "${Qt6_lib}/Versions/A/${component}" 
+                        DESTINATION .
+                        RENAME "libQt6${component}.dylib")
+                else()
+                    install(FILES "${Qt6_lib}" DESTINATION .)
+                endif()
+            
+            else()
+                install(FILES "${Qt6_lib}" DESTINATION .)
+            endif()
+        endif()
+    endif()
+endforeach()
 
+include(InstallRequiredSystemLibraries)
 set(CPACK_PACKAGE_NAME "${PROJECT_NAME}")
 set(CPACK_PACKAGE_INSTALL_DIRECTORY "${PROJECT_NAME}")
 
@@ -81,16 +92,8 @@ endif()
 
 include(CPack)
 
-# Linux/macOS stripping
 if(UNIX AND NOT APPLE)
   install(CODE "execute_process(
-    COMMAND find ${CMAKE_INSTALL_PREFIX} -name \"*.so\" -exec strip {} \;
-  )")
-endif()
-
-# Windows UPX compression (optional)
-if(WIN32 AND EXISTS "C:/upx/upx.exe")
-  install(CODE "execute_process(
-    COMMAND C:/upx/upx --best ${CMAKE_INSTALL_PREFIX}/${PYTHON_MODULES_DIR}/PyQt6/*.dll
+	COMMAND find ${CMAKE_INSTALL_PREFIX} -name \"*.so\" -exec strip {} \;
   )")
 endif()
