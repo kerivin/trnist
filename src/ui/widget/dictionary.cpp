@@ -23,7 +23,7 @@ namespace trnist::ui::widget
 
 	void Dictionary::on_definition_changed_(const trnist::core::language::Definition& definition)
 	{
-		QString text = definition.word + "\n" + definition.phonetic;
+		QString text = "<h3>" + definition.word + "</h3><p><i>" + definition.phonetic + "</i></p>";
 		text_edit_->setText(std::move(text));
 	}
 }
