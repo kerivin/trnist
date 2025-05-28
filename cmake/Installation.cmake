@@ -4,29 +4,6 @@
 
 set(PYTHON_MODULES_DIR "py_modules")
 
-get_target_property(Qt6_core_location Qt6::Core IMPORTED_LOCATION)
-if(Qt6_core_location)
-	get_filename_component(QT_BIN_DIR "${Qt6_core_location}" DIRECTORY)
-	
-	if(WIN32)
-		set(PLATFORM_LIB qwindows.dll)
-	elseif(APPLE)
-		set(PLATFORM_LIB libqcocoa.dylib)
-	else()
-		set(PLATFORM_LIB libqxcb.so)
-	endif()
-
-	find_path(QT_PLATFORMS_DIR
-		NAMES ${PLATFORM_LIB}
-		PATHS "${QT_BIN_DIR}/../plugins/platforms" "/usr/lib/qt6/plugins/platforms" "/usr/lib/x86_64-linux-gnu/qt6/plugins/platforms"
-	)
-
-	find_path(QT_TLS_DIR
-		NAMES openssl
-		PATHS "${QT_BIN_DIR}/../plugins/tls" "/usr/lib/qt6/plugins/tls" "/usr/lib/x86_64-linux-gnu/qt6/plugins/tls"
-	)
-endif()
-
 install(TARGETS ${PROJECT_NAME}
 		RUNTIME DESTINATION .
 		BUNDLE DESTINATION .
@@ -43,6 +20,25 @@ install(
 	PATTERN "*.dist-info" EXCLUDE
 	PATTERN "*.egg-info" EXCLUDE
 )
+
+get_target_property(Qt6_core_location Qt6::Core IMPORTED_LOCATION)
+if(Qt6_core_location)
+	get_filename_component(QT_BIN_DIR "${Qt6_core_location}" DIRECTORY)
+	
+	if(WIN32)
+		set(PLATFORM_LIB qwindows.dll)
+	elseif(APPLE)
+		set(PLATFORM_LIB libqcocoa.dylib)
+	else()
+		set(PLATFORM_LIB libqxcb.so)
+	endif()
+
+	find_path(QT_PLATFORMS_DIR
+		NAMES ${PLATFORM_LIB}
+		PATHS "${QT_BIN_DIR}/../plugins/platforms" "/usr/lib/qt6/plugins/platforms" "/usr/lib/x86_64-linux-gnu/qt6/plugins/platforms"
+	)
+	set(QT_TLS_DIR "${QT_PLATFORMS_DIR}/../tls")
+endif()
 
 if(QT_PLATFORMS_DIR)
 	install(DIRECTORY ${QT_PLATFORMS_DIR}/
