@@ -24,9 +24,9 @@ namespace trnist::core::language
 
 	void ApiDictionary::lookup(const QString& word, const DictionaryContext& context)
 	{
-		if (cache_.contains(word))
+		if (const auto* definition = cache_.object(word))
 		{
-			Q_EMIT definition_received(*cache_[word]);
+			Q_EMIT definition_received(*definition);
 			return;
 		}
 
@@ -36,10 +36,10 @@ namespace trnist::core::language
 		QNetworkReply* reply = network_->get(QNetworkRequest{ url });
 		connect(reply, &QNetworkReply::finished, [this, reply]()
 		{
-			if (reply->error() != QNetworkReply::NoError)
-				Q_EMIT error_occured(reply->errorString());
-			else
+			if (reply->error() == QNetworkReply::NoError)
 				parse_response_(reply->readAll());
+			else
+				Q_EMIT error_occured(reply->errorString());
 
 			reply->deleteLater();
 		});
@@ -89,8 +89,8 @@ namespace trnist::core::language
 				for (const auto& json_explanation : json_explanations)
 				{
 					const auto& explanation_object = json_explanation.toObject();
-					meaning.explanations.emplace_back(explanation_object["definition"].toString(),
-													explanation_object["example"].toString());
+					meaning.explanations.push_back(Explanation{ explanation_object["definition"].toString(),
+																	explanation_object["example"].toString() });
 				}
 			}
 		}
