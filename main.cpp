@@ -4,6 +4,7 @@
 #include <QMessageBox>
 #include <QTextEdit>
 #include <QSplitter>
+#include <QSslSocket>
 #include "ui/widget/dictionary.h"
 #include "ui/widget/translation.h"
 #include "ui/widget/structure.h"
@@ -20,6 +21,13 @@ int main(int argc, char* argv[])
 	QMainWindow main_window;
 	main_window.resize(800, 600);
 	main_window.setMinimumSize(400, 300);
+
+	const auto backends = QSslSocket::availableBackends();
+	QString message;
+	for (const auto& backend : backends)
+		message += backend + "\n";
+	QMessageBox::information(&main_window, "Available backends", message);
+	QMessageBox::information(&main_window, "Active backend", QSslSocket::activeBackend());
 
 	trnist::py::scoped_interpreter guard{};
 

@@ -49,8 +49,12 @@ if(SSL_DIR)
 	install(DIRECTORY ${SSL_DIR}/
 			DESTINATION .
 			FILES_MATCHING
-			PATTERN "*crypto*"
-			PATTERN "*ssl*"
+			PATTERN "*libcrypto*.dylib"
+			PATTERN "*libcrypto*.dll"
+			PATTERN "*libcrypto*.so*"
+			PATTERN "*libssl*.dylib"
+			PATTERN "*libssl*.dll"
+			PATTERN "*libssl*.so*"
 	)
 endif()
 
