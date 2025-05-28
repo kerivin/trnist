@@ -37,7 +37,6 @@ if(Qt6_core_location)
 		NAMES ${PLATFORM_LIB}
 		PATHS "${QT_BIN_DIR}/../plugins/platforms" "/usr/lib/qt6/plugins/platforms" "/usr/lib/x86_64-linux-gnu/qt6/plugins/platforms"
 	)
-	set(QT_TLS_DIR "${QT_PLATFORMS_DIR}/../tls")
 endif()
 
 if(QT_PLATFORMS_DIR)
@@ -46,12 +45,12 @@ if(QT_PLATFORMS_DIR)
 			FILES_MATCHING PATTERN "*${PLATFORM_LIB}")
 endif()
 
-if(QT_TLS_DIR)
-	install(DIRECTORY ${QT_TLS_DIR}/
+if(SSL_DIR)
+	install(DIRECTORY ${SSL_DIR}/
 			DESTINATION .
 			FILES_MATCHING
 			PATTERN "*crypto*"
-			PATTERN "*openssl*"
+			PATTERN "*ssl*"
 	)
 endif()
 
