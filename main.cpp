@@ -4,7 +4,6 @@
 #include <QMessageBox>
 #include <QTextEdit>
 #include <QSplitter>
-#include <QSslSocket>
 #include "ui/widget/dictionary.h"
 #include "ui/widget/translation.h"
 #include "ui/widget/structure.h"
@@ -22,21 +21,14 @@ int main(int argc, char* argv[])
 	main_window.resize(800, 600);
 	main_window.setMinimumSize(400, 300);
 
-	const auto backends = QSslSocket::availableBackends();
-	QString message;
-	for (const auto& backend : backends)
-		message += backend + "\n";
-	QMessageBox::information(&main_window, "Available backends", message);
-	QMessageBox::information(&main_window, "Active backend", QSslSocket::activeBackend());
-
-	trnist::py::scoped_interpreter guard{};
+	py::scoped_interpreter guard{};
 
 	try
 	{
 		py::module_ sys = py::module_::import("sys");
 		fs::path exe_dir = fs::path(argv[0]).parent_path();
 		sys.attr("path").attr("append")(fs::path(exe_dir / "py_modules").string());
-		trnist::utils::EmbedModules::init();
+		utils::EmbedModules::init();
 	}
 	catch (const std::exception& e)
 	{
@@ -52,13 +44,13 @@ int main(int argc, char* argv[])
 		splitter->addWidget(right_edit);
 		main_window.setCentralWidget(splitter);
 
-		trnist::ui::widget::Structure* structure_widget = new trnist::ui::widget::Structure(&main_window);
-		trnist::ui::widget::Memory* memory_widget = new trnist::ui::widget::Memory(&main_window);
+		ui::widget::Structure* structure_widget = new ui::widget::Structure(&main_window);
+		ui::widget::Memory* memory_widget = new ui::widget::Memory(&main_window);
 		main_window.addDockWidget(Qt::DockWidgetArea::LeftDockWidgetArea, structure_widget);
 		main_window.addDockWidget(Qt::DockWidgetArea::LeftDockWidgetArea, memory_widget);
 
-		trnist::ui::widget::Translation* translation_widget = new trnist::ui::widget::Translation(&main_window);
-		trnist::ui::widget::Dictionary* dictionary_widget = new trnist::ui::widget::Dictionary(&main_window);
+		ui::widget::Translation* translation_widget = new ui::widget::Translation(&main_window);
+		ui::widget::Dictionary* dictionary_widget = new ui::widget::Dictionary(&main_window);
 		main_window.addDockWidget(Qt::DockWidgetArea::RightDockWidgetArea, translation_widget);
 		main_window.addDockWidget(Qt::DockWidgetArea::RightDockWidgetArea, dictionary_widget);
 
