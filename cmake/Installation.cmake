@@ -77,18 +77,3 @@ foreach(component IN LISTS QT_COMPONENTS)
 		endif()
 	endif()
 endforeach()
-
-include(InstallRequiredSystemLibraries)
-set(CPACK_PACKAGE_NAME "${PROJECT_NAME}")
-set(CPACK_PACKAGE_INSTALL_DIRECTORY "${PROJECT_NAME}")
-
-if(WIN32)
-	set(CPACK_GENERATOR "NSIS;ZIP")
-	set(CPACK_NSIS_MODIFY_PATH ON)
-elseif(APPLE)
-	set(CPACK_GENERATOR "DragNDrop;TGZ")
-else()
-	set(CPACK_GENERATOR "DEB;TGZ")
-endif()
-
-include(CPack)
