@@ -4,10 +4,15 @@
 
 namespace trnist::core::language
 {
+	struct Explanation
+	{
+		QString description;
+		QString example;
+	};
 	struct Meaning
 	{
 		QString part_of_speech;
-		std::vector<QString> explanations;
+		std::vector<Explanation> explanations;
 	};
 
 	struct Definition

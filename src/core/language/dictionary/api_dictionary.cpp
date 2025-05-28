@@ -37,15 +37,11 @@ namespace trnist::core::language
 		connect(reply, &QNetworkReply::finished, [this, reply]()
 		{
 			if (reply->error() != QNetworkReply::NoError)
-			{
 				Q_EMIT error_occured(reply->errorString());
-				reply->deleteLater();
-			}
 			else
-			{
 				parse_response_(reply->readAll());
-				reply->deleteLater();
-			}
+
+			reply->deleteLater();
 		});
 	}
 
@@ -57,16 +53,30 @@ namespace trnist::core::language
 			Q_EMIT error_occured("Invalid response format");
 			return;
 		}
-
 		const auto& json_entries = json.array();
+		if (json_entries.empty())
+		{
+			Q_EMIT error_occured("Empty response");
+			return;
+		}
+
+		Definition* definition = nullptr;
 		for (const auto& json_entry : json_entries)
 		{
 			const auto& entry_object = json_entry.toObject();
 			const auto& word = entry_object["word"].toString();
-			Definition* definition = new Definition;
-			cache_.insert(word, definition);
-			definition->word = word;
-			definition->phonetic = entry_object["phonetics"].toArray()[0].toObject()["text"].toString();
+			if (!definition)
+			{
+				definition = new Definition;
+				cache_.insert(word, definition);
+				definition->word = word;
+			}
+
+			if (!entry_object["phonetic"].isNull())
+				definition->phonetic = entry_object["phonetic"].toString();
+			else if (!entry_object["phonetics"].isNull() && entry_object["phonetics"].isArray())
+				definition->phonetic = entry_object["phonetics"].toArray()[0].toObject()["text"].toString();
+			
 			const auto& json_meanings = entry_object["meanings"].toArray();
 			definition->meanings.reserve(json_meanings.size());
 			for (const auto& json_meaning : json_meanings)
@@ -78,11 +88,12 @@ namespace trnist::core::language
 				meaning.explanations.reserve(json_explanations.size());
 				for (const auto& json_explanation : json_explanations)
 				{
-					meaning.explanations.push_back(json_explanation.toObject()["definition"].toString());
+					const auto& explanation_object = json_explanation.toObject();
+					meaning.explanations.emplace_back(explanation_object["definition"].toString(),
+													explanation_object["example"].toString());
 				}
 			}
-			Q_EMIT definition_received(*definition);
 		}
-		Q_EMIT error_occured("No definitions found");
+		Q_EMIT definition_received(*definition);
 	}
 }
