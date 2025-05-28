@@ -4,23 +4,6 @@
 
 set(PYTHON_MODULES_DIR "py_modules")
 
-install(TARGETS ${PROJECT_NAME}
-		RUNTIME DESTINATION .
-		BUNDLE DESTINATION .
-		LIBRARY DESTINATION .
-		ARCHIVE DESTINATION .)
-
-install(
-	DIRECTORY
-		${VENV_SITE_PACKAGES}/
-	DESTINATION
-		${PYTHON_MODULES_DIR}
-	PATTERN "__pycache__" EXCLUDE
-	PATTERN "*.pyc" EXCLUDE
-	PATTERN "*.dist-info" EXCLUDE
-	PATTERN "*.egg-info" EXCLUDE
-)
-
 get_target_property(Qt6_core_location Qt6::Core IMPORTED_LOCATION)
 if(Qt6_core_location)
 	get_filename_component(QT_BIN_DIR "${Qt6_core_location}" DIRECTORY)
@@ -43,6 +26,23 @@ if(Qt6_core_location)
 		PATHS "${QT_BIN_DIR}/../plugins/tls" "/usr/lib/qt6/plugins/tls" "/usr/lib/x86_64-linux-gnu/qt6/plugins/tls"
 	)
 endif()
+
+install(TARGETS ${PROJECT_NAME}
+		RUNTIME DESTINATION .
+		BUNDLE DESTINATION .
+		LIBRARY DESTINATION .
+		ARCHIVE DESTINATION .)
+
+install(
+	DIRECTORY
+		${VENV_SITE_PACKAGES}/
+	DESTINATION
+		${PYTHON_MODULES_DIR}
+	PATTERN "__pycache__" EXCLUDE
+	PATTERN "*.pyc" EXCLUDE
+	PATTERN "*.dist-info" EXCLUDE
+	PATTERN "*.egg-info" EXCLUDE
+)
 
 if(QT_PLATFORMS_DIR)
 	install(DIRECTORY ${QT_PLATFORMS_DIR}/
