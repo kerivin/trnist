@@ -18,8 +18,6 @@ target_include_directories(${PROJECT_NAME}
 	PRIVATE
 		${Python3_INCLUDE_DIRS}
 		${pybind11_INCLUDE_DIRS}
-		OpenSSL::SSL
-    	OpenSSL::Crypto
 )
 
 target_link_libraries(${PROJECT_NAME} PRIVATE
