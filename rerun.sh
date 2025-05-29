@@ -1,4 +1,4 @@
 rm -rf build
-rm -rf tmp
-cmake -B build -DCMAKE_INSTALL_PREFIX=tmp
+rm -rf bin
+cmake -B build -DCMAKE_INSTALL_PREFIX=bin
 sh run.sh

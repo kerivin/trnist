@@ -1,12 +1,13 @@
 #pragma once
 #include <QObject>
 #include <QDockWidget>
+#include <QCache>
+#include <memory>
 
 class QTextEdit;
 
 namespace trnist::core::language
 {
-	struct Definition;
 	class IDictionary;
 }
 
@@ -17,17 +18,26 @@ namespace trnist::ui::widget
 		Q_OBJECT
 	public:
 		Dictionary(QWidget* parent = nullptr);
-		void update();
+		~Dictionary();
+	
+	public Q_SLOTS:
+		void request_definition(const QString& word);
 
 	private Q_SLOTS:
-		void on_definition_received_(const trnist::core::language::Definition&);
-		void on_definition_error_(const QString&);
-		void on_word_selected_(const QString&);
+		void on_definition_html_received_(const QString& html);
+		void on_definition_not_found_();
+		void on_definition_error_(const QString& error);
 
 	private:
+		void update_(const QString& html);
+
+	private:
+		struct Request;
+
 		trnist::core::language::IDictionary* const dictionary_;
+		QCache<QString /* word */, QString /* html */> cache_;
+		std::unique_ptr<Request> request_;
+
 		QTextEdit* const text_edit_;
-		QString word_;
-		uint8_t retry_count = 0;
 	};
 }

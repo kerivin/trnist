@@ -55,7 +55,7 @@ int main(int argc, char* argv[])
 		main_window.addDockWidget(Qt::DockWidgetArea::RightDockWidgetArea, dictionary_widget);
 
 		translation_widget->update();
-		dictionary_widget->update();
+		dictionary_widget->request_definition("халат");
 
 		main_window.show();
 	}

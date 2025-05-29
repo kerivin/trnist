@@ -145,6 +145,7 @@ namespace trnist::utils
 
 	void EmbedModules::init()
 	{
+		py::gil_scoped_acquire python_quard;
 		py::exec(R"(
 			import exejs
 			globals().update(vars(exejs))
