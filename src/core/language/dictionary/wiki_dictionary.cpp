@@ -7,7 +7,7 @@
 #include <QUrl>
 #include "core/language/dictionary/dictionary_context.h"
 
-// https://en.wiktionary.org/w/api.php?action=query&format=json&titles=crop&prop=extracts&redirects=true
+// https://en.wikipedia.org/w/api.php?action=help&modules=query
 
 namespace trnist::core::language
 {
@@ -49,6 +49,8 @@ namespace trnist::core::language
 			return;
 		}
 		const auto& json_page = json_pages.value(page_id).toObject();
-		Q_EMIT html_created(json_page["extract"].toString());
+		QString html = json_page["extract"].toString();
+		html.replace(QRegularExpression(R"(<(/?)h1\b)"), "<\\1h2");
+		Q_EMIT html_created(html);
 	}
 }

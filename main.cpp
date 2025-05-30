@@ -4,15 +4,23 @@
 #include <QMessageBox>
 #include <QTextEdit>
 #include <QSplitter>
+#include <QThread>
+#include <QRegularExpression>
 #include "ui/widget/dictionary.h"
 #include "ui/widget/translation.h"
 #include "ui/widget/structure.h"
 #include "ui/widget/memory.h"
-#include "pybind.h"
 #include "utils/embed_modules.h"
+#include "pybind.h"
+#include "core/language/dictionary/dictionary_context.h"
 
 namespace fs = std::filesystem;
 using namespace trnist;
+
+inline bool is_single_word(const QString& text)
+{
+	return QRegularExpression(R"(^\w+$)").match(text).hasMatch();
+}
 
 int main(int argc, char* argv[])
 {
@@ -35,13 +43,19 @@ int main(int argc, char* argv[])
 		QMessageBox::critical(&main_window, "Error", e.what());
 	}
 
+	qDebug() << "Ideal thread count: " << QThread::idealThreadCount();
+
+	QThread translation_thread;
+	QThread definition_thread;
+
 	try
 	{
 		QSplitter* splitter = new QSplitter(Qt::Horizontal, &main_window);
-		QTextEdit* left_edit = new QTextEdit(splitter);
-		QTextEdit* right_edit = new QTextEdit(splitter);
-		splitter->addWidget(left_edit);
-		splitter->addWidget(right_edit);
+		QTextEdit* translation_edit = new QTextEdit(splitter);
+		QTextEdit* original_edit = new QTextEdit(splitter);
+		// original_edit->setReadOnly(true);
+		splitter->addWidget(translation_edit);
+		splitter->addWidget(original_edit);
 		main_window.setCentralWidget(splitter);
 
 		ui::widget::Structure* structure_widget = new ui::widget::Structure(&main_window);
@@ -49,13 +63,40 @@ int main(int argc, char* argv[])
 		main_window.addDockWidget(Qt::DockWidgetArea::LeftDockWidgetArea, structure_widget);
 		main_window.addDockWidget(Qt::DockWidgetArea::LeftDockWidgetArea, memory_widget);
 
-		ui::widget::Translation* translation_widget = new ui::widget::Translation(&main_window);
-		ui::widget::Dictionary* dictionary_widget = new ui::widget::Dictionary(&main_window);
-		main_window.addDockWidget(Qt::DockWidgetArea::RightDockWidgetArea, translation_widget);
-		main_window.addDockWidget(Qt::DockWidgetArea::RightDockWidgetArea, dictionary_widget);
+		{
+			ui::widget::Translation* translation_widget = new ui::widget::Translation(&main_window);
+			ui::widget::Dictionary* dictionary_widget = new ui::widget::Dictionary(&main_window);
+			main_window.addDockWidget(Qt::DockWidgetArea::RightDockWidgetArea, translation_widget);
+			main_window.addDockWidget(Qt::DockWidgetArea::RightDockWidgetArea, dictionary_widget);
 
-		translation_widget->update();
-		dictionary_widget->request_definition("халат");
+			translation_widget->moveToThread(&translation_thread);
+			QObject::connect(&translation_thread, &QThread::finished, translation_widget, &QObject::deleteLater);
+			dictionary_widget->moveToThread(&definition_thread);
+			QObject::connect(&definition_thread, &QThread::finished, dictionary_widget, &QObject::deleteLater);
+
+			QObject::connect(translation_edit, &QTextEdit::selectionChanged, [&]()
+			{
+				qDebug() << "translation_edit selectionChanged";
+				QSignalBlocker blocker1(translation_edit);
+				QSignalBlocker blocker2(dictionary_widget);
+
+				const QString selected_text = translation_edit->textCursor().selectedText();
+				if (is_single_word(selected_text))
+					dictionary_widget->update(selected_text, { "ru" });
+			});
+			QObject::connect(original_edit, &QTextEdit::selectionChanged, [&]()
+			{
+				qDebug() << "original_edit selectionChanged";
+				QSignalBlocker blocker1(original_edit);
+				QSignalBlocker blocker2(dictionary_widget);
+				QSignalBlocker blocker3(translation_widget);
+
+				const QString selected_text = original_edit->textCursor().selectedText();
+				if (is_single_word(selected_text))
+					dictionary_widget->update(selected_text, { "en" });
+				translation_widget->update(selected_text, { .api = "yandex", .from_lang = "en", .to_lang = "ru" });
+			});
+		}
 
 		main_window.show();
 	}
@@ -63,6 +104,9 @@ int main(int argc, char* argv[])
 	{
 		QMessageBox::critical(&main_window, "Error", e.what());
 	}
+
+	translation_thread.start();
+	definition_thread.start();
 
 	return app.exec();
 }

@@ -7,17 +7,17 @@ namespace trnist::ui::widget
 {
 	Translation::Translation(QWidget* parent)
 		: QDockWidget("Translation", parent)
-		, translator_(new trnist::core::language::ApiTranslator(this))
+		, translator_(new core::language::ApiTranslator(this))
 		, text_edit_(new QTextEdit(this))
 	{
 		setWidget(text_edit_);
 		text_edit_->setReadOnly(true);
-		connect(translator_, &trnist::core::language::ITranslator::translate_received, this, &Translation::on_translation_changed_);
+		connect(translator_, &core::language::ITranslator::translate_received, this, &Translation::on_translation_changed_);
 	}
 
-	void Translation::update()
+	void Translation::update(const QString& text, const core::language::TranslatorContext& context)
 	{
-		translator_->translate("It cannot be called our mother, but our grave.", { .api = "yandex", .from_lang = "en", .to_lang = "ru" });
+		translator_->translate(text, context);
 	}
 
 	void Translation::on_translation_changed_(const QString& translation)

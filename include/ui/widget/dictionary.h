@@ -9,6 +9,7 @@ class QTextEdit;
 namespace trnist::core::language
 {
 	class IDictionary;
+	struct DictionaryContext;
 }
 
 namespace trnist::ui::widget
@@ -21,7 +22,7 @@ namespace trnist::ui::widget
 		~Dictionary();
 	
 	public Q_SLOTS:
-		void request_definition(const QString& word);
+		void update(const QString& word, const core::language::DictionaryContext&);
 
 	private Q_SLOTS:
 		void on_definition_html_received_(const QString& html);
@@ -34,8 +35,8 @@ namespace trnist::ui::widget
 	private:
 		struct Request;
 
-		trnist::core::language::IDictionary* const dictionary_;
-		QCache<QString /* word */, QString /* html */> cache_;
+		core::language::IDictionary* const dictionary_;
+		QCache<size_t /* word + language hash */, QString /* html */> cache_;
 		std::unique_ptr<Request> request_;
 
 		QTextEdit* const text_edit_;

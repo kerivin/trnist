@@ -1,12 +1,14 @@
 #pragma once
 #include <QObject>
 #include <QDockWidget>
+#include "core/language/translator/translator_context.h"
 
 class QTextEdit;
 
 namespace trnist::core::language
 {
 	class ITranslator;
+	struct TranslatorContext;
 }
 
 namespace trnist::ui::widget
@@ -16,7 +18,7 @@ namespace trnist::ui::widget
 		Q_OBJECT
 	public:
 		Translation(QWidget* parent = nullptr);
-		void update();
+		void update(const QString&, const core::language::TranslatorContext&);
 
 	private Q_SLOTS:
 		void on_translation_changed_(const QString&);
