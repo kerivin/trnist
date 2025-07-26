@@ -1,8 +1,8 @@
 {
-  "name": "trnist",
-  "productName": "Trnist",
-  "version": "0.0.1",
-  "description": "Book Translationist",
+  "name": "my-app",
+  "productName": "my-app",
+  "version": "1.0.0",
+  "description": "My Electron application description",
   "main": ".vite/build/main.js",
   "scripts": {
     "start": "electron-forge start",
@@ -27,26 +27,18 @@
     "@electron-forge/plugin-fuses": "^7.8.1",
     "@electron-forge/plugin-vite": "^7.8.1",
     "@electron/fuses": "^1.8.0",
-    "@types/node": "^24.1.0",
-    "@types/react": "^19.1.8",
-    "@types/react-dom": "^19.1.6",
-    "@types/slate": "^0.47.16",
     "@typescript-eslint/eslint-plugin": "^5.62.0",
     "@typescript-eslint/parser": "^5.62.0",
-    "concurrently": "^9.2.0",
     "electron": "37.2.4",
     "eslint": "^8.57.1",
     "eslint-plugin-import": "^2.32.0",
     "ts-node": "^10.9.2",
-    "typescript": "^5.8.3",
-    "vite": "^7.0.6"
+    "typescript": "~4.5.4",
+    "vite": "^5.4.19"
   },
   "dependencies": {
-    "electron": "^37.2.4",
     "electron-squirrel-startup": "^1.0.1",
     "react": "^19.1.0",
-    "react-dom": "^19.1.0",
-    "slate": "^0.117.2",
-    "slate-react": "^0.117.4"
+    "react-dom": "^19.1.0"
   }
 }
