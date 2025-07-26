@@ -30,6 +30,7 @@
     "@types/electron-squirrel-startup": "^1.0.2",
     "@types/react": "^19.1.8",
     "@types/react-dom": "^19.1.6",
+    "@types/slate": "^0.47.16",
     "@typescript-eslint/eslint-plugin": "^5.62.0",
     "@typescript-eslint/parser": "^5.62.0",
     "@vitejs/plugin-react": "^4.7.0",
@@ -46,6 +47,8 @@
     "react": "^19.1.0",
     "react-dom": "^19.1.0",
     "slate": "^0.117.2",
+    "slate-history": "^0.113.1",
+    "slate-hyperscript": "^0.100.0",
     "slate-react": "^0.117.4"
   }
 }
