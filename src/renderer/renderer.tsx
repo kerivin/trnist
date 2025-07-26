@@ -27,8 +27,9 @@
  */
 
 import './index.css';
+import App from './app';
+import { createRoot } from 'react-dom/client';
 
-console.log('👋 This message is being logged by "renderer.ts", included via Vite');
-
-// Add this to the end of the existing file
-import './app.jsx';
+const rootElement = document.getElementById('root') as HTMLElement;
+const root = createRoot(rootElement);
+root.render(<App />);
