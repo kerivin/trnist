@@ -1,4 +1,4 @@
-import { app, BrowserWindow } from 'electron';
+import { app, screen, BrowserWindow } from 'electron';
 import path from 'node:path';
 
 // Handle creating/removing shortcuts on Windows when installing/uninstalling
@@ -12,6 +12,8 @@ const createWindow = () => {
     height: 600,
     webPreferences: {
       preload: path.join(__dirname, 'preload.js'),
+      nodeIntegration: true,
+      contextIsolation: false,
     },
   });
 
