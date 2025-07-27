@@ -5,11 +5,35 @@ body {
 }
 
 .resize-handle {
-  width: 0.1em;
-  background: #222;
+  width: 0.1rem;
+  background: dimgray;
 }
 
 .resize-handle.sticky {
-  width: 0.2em;
-  background: #0e639c;
+  width: 0.2rem;
+  background: orangered;
+}
+
+.direction-ltr > * {
+  direction: ltr;
+}
+
+::-webkit-scrollbar {
+  width: 0.3rem;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: lightgray;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: gray;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  cursor: default;
 }

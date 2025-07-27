@@ -38,8 +38,7 @@ export const MainWindow = () => {
   };
 
   return (
-    // <TextEditor />
-    <div style={{ width: '100vw', height: '100vh' }}>
+    <div style={{ width: '100vw', height: '100vh', scrollbarWidth: 'thin' }}>
       <PanelGroup autoSaveId="layout" direction="horizontal" ref={panelGroupRef} onLayout={handleLayout}>
         <Panel id="left-left" collapsible={true} minSize={5} defaultSize={defaultSizes[0]} collapsedSize={2}>
           <span>Left Left</span>
@@ -47,11 +46,11 @@ export const MainWindow = () => {
         </Panel>
         <PanelResizeHandle className="resize-handle" />
         <Panel id="left-middle" collapsible={false} minSize={20} defaultSize={defaultSizes[1]}>
-          <TextEditor />
+          <TextEditor style={{ width: '100%', height: '100%', outline: 'none', boxShadow: 'none', overflowY: 'auto', direction: 'rtl' }} />
         </Panel>
         <PanelResizeHandle className={`resize-handle ${getActiveHandleIndex === 1 && isInStickyZone ? 'sticky' : ''}`} onDragging={(dragging) => handleDragging(dragging, 1)} />
         <Panel id="right-middle" collapsible={false} minSize={20} defaultSize={defaultSizes[2]}>
-          <TextViewer />
+          <TextViewer style={{ width: '100%', height: '100%', outline: 'none', boxShadow: 'none', overflowY: 'auto' }} />
         </Panel>
         <PanelResizeHandle className="resize-handle" />
         <Panel id="right-right" collapsible={true} minSize={5} defaultSize={defaultSizes[3]} collapsedSize={2}>
