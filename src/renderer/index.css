@@ -28,6 +28,7 @@ body {
 
 ::-webkit-scrollbar-thumb {
   background: lightgray;
+  min-height: 5rem;
 }
 
 ::-webkit-scrollbar-thumb:hover {
