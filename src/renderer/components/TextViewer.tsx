@@ -13,6 +13,6 @@ const initialValue: Descendant[] = [
 export const TextViewer = ({ ...props }) => {
   const [editor] = useState(() => withReact(createEditor()));
   return (<Slate editor={editor} initialValue={initialValue}>
-            <Editable {...props} style={{ ...props.style }} className="direction-ltr" spellCheck={false} readOnly={true} />
+            <Editable {...props} style={{ ...props.style }} className="child-direction-ltr" spellCheck={false} readOnly={true} />
           </Slate>);
 };

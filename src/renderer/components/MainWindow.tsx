@@ -46,11 +46,11 @@ export const MainWindow = () => {
         </Panel>
         <PanelResizeHandle className="resize-handle" />
         <Panel id="left-middle" collapsible={false} minSize={20} defaultSize={defaultSizes[1]}>
-          <TextEditor style={{ width: '100%', height: '100%', outline: 'none', boxShadow: 'none', overflowY: 'auto', direction: 'rtl' }} />
+          <TextEditor style={{ padding: '2rem', width: '100%', height: '100%', outline: 'none', boxShadow: 'none', overflow: 'auto', boxSizing: 'border-box', direction: 'rtl' }} />
         </Panel>
         <PanelResizeHandle className={`resize-handle ${getActiveHandleIndex === 1 && isInStickyZone ? 'sticky' : ''}`} onDragging={(dragging) => handleDragging(dragging, 1)} />
         <Panel id="right-middle" collapsible={false} minSize={20} defaultSize={defaultSizes[2]}>
-          <TextViewer style={{ width: '100%', height: '100%', outline: 'none', boxShadow: 'none', overflowY: 'auto' }} />
+          <TextViewer style={{ padding: '2rem', width: '100%', height: '100%', outline: 'none', boxShadow: 'none', overflow: 'auto', boxSizing: 'border-box' }} />
         </Panel>
         <PanelResizeHandle className="resize-handle" />
         <Panel id="right-right" collapsible={true} minSize={5} defaultSize={defaultSizes[3]} collapsedSize={2}>

@@ -14,7 +14,7 @@ body {
   background: orangered;
 }
 
-.direction-ltr > * {
+.child-direction-ltr > * {
   direction: ltr;
 }
 
