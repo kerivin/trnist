@@ -25,7 +25,7 @@ body {
 }
 
 ::-webkit-scrollbar {
-  width: 1rem;
+  width: 0.8rem;
 }
 
 ::-webkit-scrollbar-track {
@@ -42,7 +42,7 @@ body {
   overflow: hidden;
   border-style: solid;
   border-color: transparent;
-  border-width: 0 0.4rem 0 0.4rem;
+  border-width: 0 0.3rem 0 0.3rem;
   background-clip: padding-box;
 }
 

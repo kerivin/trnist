@@ -46,11 +46,11 @@ export const MainWindow = () => {
         </Panel>
         <PanelResizeHandle className="resize-handle" />
         <Panel id="left-middle" collapsible={false} minSize={20} defaultSize={defaultSizes[1]}>
-          <TextEditor style={{ padding: '2rem', width: '100%', height: '100%', outline: 'none', boxShadow: 'none', overflow: 'auto', boxSizing: 'border-box', lineHeight: '1.5rem', marginLeft: '-0.4rem', direction: 'rtl' }} />
+          <TextEditor style={{ padding: '2rem', width: '100%', height: '100%', outline: 'none', boxShadow: 'none', overflow: 'auto', boxSizing: 'border-box', lineHeight: '1.5rem', marginLeft: '-0.3rem', direction: 'rtl' }} />
         </Panel>
         <PanelResizeHandle className={`resize-handle ${getActiveHandleIndex === 1 && isInStickyZone ? 'sticky' : ''}`} onDragging={(dragging) => handleDragging(dragging, 1)} />
         <Panel id="right-middle" collapsible={false} minSize={20} defaultSize={defaultSizes[2]}>
-          <TextViewer style={{ padding: '2rem', width: '100%', height: '100%', outline: 'none', boxShadow: 'none', overflow: 'auto', boxSizing: 'border-box', lineHeight: '1.5rem', marginRight: '0.4rem' }} />
+          <TextViewer style={{ padding: '2rem', width: '100%', height: '100%', outline: 'none', boxShadow: 'none', overflow: 'auto', boxSizing: 'border-box', lineHeight: '1.5rem', marginLeft: '0.3rem' }} />
         </Panel>
         <PanelResizeHandle className="resize-handle" />
         <Panel id="right-right" collapsible={true} minSize={5} defaultSize={defaultSizes[3]} collapsedSize={2}>
