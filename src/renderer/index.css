@@ -5,12 +5,12 @@ body {
 }
 
 .resize-handle {
-  width: 0.1rem;
-  background: dimgray;
+  width: 0.05rem;
+  background: black;
 }
 
 .resize-handle.sticky {
-  width: 0.2rem;
+  width: 0.1rem;
   background: orangered;
 }
 
@@ -18,23 +18,35 @@ body {
   direction: ltr;
 }
 
+.scroll-container {
+  overflow: auto;
+  height: 100%;
+  width: 100%;
+}
+
 ::-webkit-scrollbar {
-  width: 0.3rem;
+  width: 1rem;
 }
 
 ::-webkit-scrollbar-track {
   background: transparent;
 }
 
-::-webkit-scrollbar-thumb {
-  background: lightgray;
-  min-height: 5rem;
+::-webkit-scrollbar-track:hover {
+  cursor: default;
 }
 
-::-webkit-scrollbar-thumb:hover {
-  background: gray;
+::-webkit-scrollbar-thumb {
+  background: black;
+  min-height: 5rem;
+  overflow: hidden;
+  border-style: solid;
+  border-color: transparent;
+  border-width: 0 0.4rem 0 0.4rem;
+  background-clip: padding-box;
 }
 
 ::-webkit-scrollbar-thumb:hover {
   cursor: default;
+  border: 0;
 }

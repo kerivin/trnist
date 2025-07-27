@@ -18,7 +18,7 @@ export type ParagraphElement = {
 
 export type HeadingElement = {
   type: 'heading'
-  level: number
+  level: 1 | 2 | 3 | 4 | 5 | 6;
   children: CustomText[]
 };
 
