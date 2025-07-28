@@ -12,7 +12,7 @@ body {
   --behind-box-offset: calc(-1 * (var(--behind-box-size) / 2 + var(--splitter-size) / 2));
   --header-size: calc((var(--behind-box-size) / 2 - var(--splitter-size) / 2));
 
-  --scrollbar-full-width: calc(var(--default-size) * 3);
+  --scrollbar-full-width: calc(var(--default-size) * 4);
   --scrollbar-small-width: var(--default-size);
   --scrollbar-min-height: 4rem;
   --scrollbar-border-width: calc((var(--scrollbar-full-width) - var(--scrollbar-small-width)) / 2);
