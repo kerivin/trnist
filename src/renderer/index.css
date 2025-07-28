@@ -105,9 +105,9 @@ body {
   overflow: visible;
 }
 
-.layout_theme .flexlayout__tabset:before,
-.layout_theme .flexlayout__tabset:after,
-.layout_theme .flexlayout__tabset *:first-child:before,
+.layout_theme .flexlayout__tabset::before,
+.layout_theme .flexlayout__tabset::after,
+.layout_theme .flexlayout__tabset *:first-child::before,
 .layout_theme .flexlayout__tabset *:first-child::after {
   content: '';
   height: var(--behind-box-size);
