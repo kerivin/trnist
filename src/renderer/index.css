@@ -5,14 +5,14 @@ body {
 }
 
 .layout_theme {
-  --splitter-size: 4px; /* from MainWindow.tsx */
+  --splitter-size: 2px; /* from MainWindow.tsx */
   --default-size: var(--splitter-size);
 
   --behind-box-size: 4rem;
   --behind-box-offset: calc(-1 * (var(--behind-box-size) / 2 + var(--splitter-size) / 2));
   --header-size: calc((var(--behind-box-size) / 2 - var(--splitter-size) / 2));
 
-  --scrollbar-full-width: calc(var(--default-size) * 4);
+  --scrollbar-full-width: calc(var(--default-size) * 8);
   --scrollbar-small-width: var(--default-size);
   --scrollbar-min-height: 4rem;
   --scrollbar-border-width: calc((var(--scrollbar-full-width) - var(--scrollbar-small-width)) / 2);
@@ -47,6 +47,10 @@ body {
   border-width: var(--scrollbar-border-width) 0 var(--scrollbar-border-width) 0;
 }
 
+::-webkit-scrollbar-track:hover {
+  cursor: default;
+}
+
 ::-webkit-scrollbar-thumb:hover {
   cursor: default;
   border: 0;
@@ -67,8 +71,8 @@ body {
   --color-splitter-hover: black;
   --color-splitter-drag: orangered;
   --color-border-tab-unselected: gray;
-  --color-edge-marker: transparent;
-  --color-edge-icon: black;
+  --color-edge-marker: orangered;
+  --color-edge-icon: transparent;
 
   overflow: clip;
   z-index: 0;

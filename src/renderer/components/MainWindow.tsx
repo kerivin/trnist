@@ -9,9 +9,9 @@ const model_json: IJsonModel = {
   global: {
     enableEdgeDock: true,
     splitterEnableHandle: false,
-    splitterSize: 4,
+    splitterSize: 2,
     splitterExtra: 5,
-    tabDragSpeed: 0.05,
+    tabDragSpeed: 0.1,
     tabEnableRename: false,
     tabEnablePopout: false,
     tabMinWidth: 50,
