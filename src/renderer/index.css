@@ -2,118 +2,132 @@ body {
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica,
     Arial, sans-serif;
   margin: auto;
-  scroll-margin: 20px;
 }
 
-.resize-handle {
-  width: 0.05rem;
-  background: black;
-}
+.layout_theme {
+  --splitter-size: 4px; /* from MainWindow.tsx */
+  --default-size: var(--splitter-size);
 
-.resize-handle.sticky {
-  width: 0.1rem;
-  background: orangered;
+  --behind-box-size: 4rem;
+  --behind-box-offset: calc(-1 * (var(--behind-box-size) / 2 + var(--splitter-size) / 2));
+  --header-size: calc((var(--behind-box-size) / 2 - var(--splitter-size) / 2));
+
+  --scrollbar-full-width: calc(var(--default-size) * 3);
+  --scrollbar-small-width: var(--default-size);
+  --scrollbar-min-height: 4rem;
+  --scrollbar-border-width: calc((var(--scrollbar-full-width) - var(--scrollbar-small-width)) / 2);
+
+  --tab-conent-padding-right: 0.5rem;
+  --scroll-margin: calc((var(--scrollbar-full-width) - var(--scrollbar-small-width)) / -2);
+  --tab-content-margin: 0 calc(var(--scroll-margin) - var(--tab-conent-padding-right)) 0 0; /* <- makes scrollbar closer to the edge */
+  --tab-content-padding: 0 var(--tab-conent-padding-right) 0 var(--tab-conent-padding-right);
 }
 
 ::-webkit-scrollbar {
-  width: 0.6rem;
-  height: 0.6rem;
+  width: var(--scrollbar-full-width);
+  height: var(--scrollbar-full-width);
   overflow: hidden;
-}
-
-::-webkit-scrollbar-track {
-  background: transparent;
-  border: 0.35rem solid transparent;
-  background-clip: padding-box;
-  border-radius: 100px;
-}
-
-::-webkit-scrollbar-track:hover {
-  background: rgba(128, 127, 128, 0.3);
-  cursor: default;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: rgba(128, 128, 128, 0.3);
-  min-width: 2rem;
-  min-height: 2rem;
-  border-radius: 100px;
+  background: orangered;
+  min-height: var(--scrollbar-min-height);
+  min-width: var(--scrollbar-min-height);
+  overflow: hidden;
+  border-style: solid;
+  border-color: transparent;
+  background-clip: padding-box;
+}
+
+::-webkit-scrollbar-thumb:vertical {
+  border-width: 0 var(--scrollbar-border-width) 0 var(--scrollbar-border-width);
+}
+
+::-webkit-scrollbar-thumb:horizontal {
+  border-width: var(--scrollbar-border-width) 0 var(--scrollbar-border-width) 0;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: orangered;
   cursor: default;
+  border: 0;
 }
 
-.flexlayout__layout {
-  --color-background: rgba(217, 217, 217, 1) !important;
-  --color-tab-content: transparent !important;
-  --color-drag1: orangered !important;
-  --color-drag2: orangered !important;
-  --color-drag1-background: rgba(255, 69, 0, 0.1) !important;
-  --color-drag2-background: rgba(255, 69, 0, 0.3) !important;
-  --color-splitter: transparent !important;
-  --color-splitter-hover: transparent !important;
-  --color-splitter-drag: orangered !important;
-  --color-tabset-background: transparent !important;
-
-  --tab-border-radius: 1rem;
-  --color-shadow-light: rgba(255, 255, 255, 0.5);
-  --color-shadow-dark: rgba(0, 0, 0, 0.2);
-
-  padding: 0.5rem;
-  overflow: hidden;
+.layout_theme .flexlayout__tab_moveable {
+  margin: var(--tab-content-margin);
+  padding: var(--tab-content-padding);
 }
 
-.flexlayout__tabset, .flexlayout__outline_rect, .flexlayout__outline_rect_edge, .flexlayout__tab_border, .flexlayout__border_tab_contents, .flexlayout__splitter_drag {
-  border-radius: var(--tab-border-radius) !important;
+.layout_theme .flexlayout__layout {
+  --color-background: lightgray;
+  --color-drag1: orangered;
+  --color-drag2: orangered;
+  --color-drag1-background: rgba(255, 69, 0, 0.1);
+  --color-drag2-background: rgba(255, 69, 0, 0.3);
+  --color-splitter: transparent;
+  --color-splitter-hover: black;
+  --color-splitter-drag: orangered;
+  --color-border-tab-unselected: gray;
+  --color-edge-marker: transparent;
+  --color-edge-icon: black;
+
+  overflow: clip;
+  z-index: 0;
 }
 
-/* .flexlayout__tab_button, .flexlayout__border_button {
-  border-radius: 10px !important;
-} */
-
-.flexlayout__border_button_trailing {
-  visibility: visible !important;
+.layout_theme .flexlayout__splitter,
+.layout_theme .flexlayout__splitter:hover,
+.layout_theme .flexlayout__splitter_drag,
+.layout_theme .flexlayout__popup_menu_container,
+.layout_theme .flexlayout__drag_rect,
+.layout_theme .flexlayout__outline_rect,
+.layout_theme .flexlayout__outline_rect_edge {
+  border-radius: 0 !important;
 }
 
-.flexlayout__tab_button, .flexlayout__border_button {
-  padding-left: 0.4rem !important;
-  padding-right: 0.4rem !important;
+.layout_theme .flexlayout__popup_menu_container {
+  box-shadow: none;
 }
 
-.flexlayout__splitter_handle_horz, .flexlayout__splitter_handle_vert, .flexlayout__tabset-selected, .flexlayout__border_tab_contents {
-  background: transparent !important;
+.layout_theme .flexlayout__tabset_tabbar_outer_top {
+  height: var(--header-size);
 }
 
-.flexlayout__splitter_drag {
-  border: 5px solid transparent !important;
-  background-clip: padding-box !important;
+.layout_theme .flexlayout__tabset_container, .layout_theme .flexlayout__border_tab_contents, .layout_theme .flexlayout__border {
+  background-color: var(--color-background);
 }
 
-/* .flexlayout__splitter_handle_horz {
-  width: 10px;
-  height: 30px;
-}
-.flexlayout__splitter_handle_vert {
-  width: 30px;
-  height: 3px;
-} */
-
-.flexlayout__tabset_container, .flexlayout__row {
-  overflow: visible !important;
+.layout_theme .flexlayout__tabset, .layout_theme .flexlayout__tabset_container, .layout_theme .flexlayout__row {
+  overflow: visible;
 }
 
-.flexlayout__tabset, .flexlayout__border_tab_contents {
-  box-shadow:  3px 3px 6px var(--color-shadow-dark),
-             -3px -3px 6px var(--color-shadow-light) !important;
+.layout_theme .flexlayout__tabset:before,
+.layout_theme .flexlayout__tabset:after,
+.layout_theme .flexlayout__tabset *:first-child:before,
+.layout_theme .flexlayout__tabset *:first-child::after {
+  content: '';
+  height: var(--behind-box-size);
+  width: var(--behind-box-size);
+  position: absolute;
+  background: black;
+  z-index: -1;
 }
 
-.flexlayout__tab_moveable {
-  padding-left: 0.5rem !important;
-  padding-right:0.5rem !important;
+.layout_theme .flexlayout__tabset::before {
+  left: var(--behind-box-offset);
+  top: var(--behind-box-offset);
 }
 
-.flexlayout__tabset {
-  padding: 0 !important;
+.layout_theme .flexlayout__tabset::after {
+  right: var(--behind-box-offset);
+  top: var(--behind-box-offset);
+}
+
+.layout_theme .flexlayout__tabset *:first-child::before {
+  left: var(--behind-box-offset);
+  bottom: var(--behind-box-offset);
+}
+
+.layout_theme .flexlayout__tabset *:first-child::after {
+  bottom: var(--behind-box-offset);
+  right: var(--behind-box-offset);
 }

@@ -3,14 +3,14 @@ import { TextEditor } from './TextEditor';
 import { TextViewer } from './TextViewer';
 import { BiChevronsLeft, BiChevronsRight } from 'react-icons/bi';
 import { Action, Layout, Model, TabNode, IJsonModel, IJsonTabNode, TabSetNode, BorderNode, ITabSetRenderValues, Actions, DockLocation, AddIcon } from 'flexlayout-react';
-import 'flexlayout-react/style/rounded.css';  
+import 'flexlayout-react/style/combined.css';  
 
 const model_json: IJsonModel = {
   global: {
     enableEdgeDock: true,
     splitterEnableHandle: false,
-    splitterSize: 15,
-    splitterExtra: 2,
+    splitterSize: 4,
+    splitterExtra: 5,
     tabDragSpeed: 0.05,
     tabEnableRename: false,
     tabEnablePopout: false,
@@ -29,7 +29,7 @@ const model_json: IJsonModel = {
           type: "tab",
           name: "Spare Left Tab",
           component: "placeholder",
-          enableClose: false,
+          enableClose: true,
         },
       ]
     },
@@ -41,7 +41,7 @@ const model_json: IJsonModel = {
           type: "tab",
           name: "Spare Right Tab",
           component: "placeholder",
-          enableClose: false,
+          enableClose: true,
         },
       ]
     },
@@ -58,7 +58,7 @@ const model_json: IJsonModel = {
           {
             type: "tab",
             name: "Notes",
-            component: "placeholder",
+            component: "TextEditor",
             id: "Notes",
           }
         ]
@@ -71,7 +71,8 @@ const model_json: IJsonModel = {
             type: "tab",
             name: "Editor",
             component: "TextEditor",
-            id: "TextEditor"
+            id: "TextEditor",
+            enableClose: false,
           }
         ]
       },
@@ -83,7 +84,8 @@ const model_json: IJsonModel = {
             type: "tab",
             name: "Viewer",
             component: "TextViewer",
-            id: "TextViewer"
+            id: "TextViewer",
+            enableClose: false,
           }
         ]
       },
@@ -111,7 +113,7 @@ export const MainWindow = () => {
     const component = node.getComponent();
     switch (component) {
       case "TextEditor":
-        return <TextEditor style={{ height: '100%', outline: 'none', boxShadow: 'none', overflow: 'auto', boxSizing: 'border-box', lineHeight: '1.5rem', marginRight: '-0.5rem' }} />;
+        return <TextEditor style={{ height: '100%', outline: 'none', boxShadow: 'none', overflow: 'auto', boxSizing: 'border-box', lineHeight: '1.5rem' }} />;
       case "TextViewer":
         return <TextViewer style={{ height: '100%', outline: 'none', boxShadow: 'none', overflow: 'auto', boxSizing: 'border-box', lineHeight: '1.5rem' }} />;
         default:
@@ -119,5 +121,5 @@ export const MainWindow = () => {
     }
   };
 
-  return(<Layout model={model} factory={factory} realtimeResize={false} />);
+  return(<div className='layout_theme'><Layout model={model} factory={factory} realtimeResize={false} /></div>);
 };
