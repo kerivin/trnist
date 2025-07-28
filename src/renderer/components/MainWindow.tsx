@@ -111,7 +111,7 @@ export const MainWindow = () => {
     const component = node.getComponent();
     switch (component) {
       case "TextEditor":
-        return <TextEditor style={{ height: '100%', outline: 'none', boxShadow: 'none', overflow: 'auto', boxSizing: 'border-box', lineHeight: '1.5rem', direction: 'rtl' }} />;
+        return <TextEditor style={{ height: '100%', outline: 'none', boxShadow: 'none', overflow: 'auto', boxSizing: 'border-box', lineHeight: '1.5rem', marginRight: '-0.5rem' }} />;
       case "TextViewer":
         return <TextViewer style={{ height: '100%', outline: 'none', boxShadow: 'none', overflow: 'auto', boxSizing: 'border-box', lineHeight: '1.5rem' }} />;
         default:

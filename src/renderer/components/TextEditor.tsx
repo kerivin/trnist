@@ -14,6 +14,6 @@ const initialValue: Descendant[] = [
 export const TextEditor = ({ ...props }) => {
   const [editor] = useState(() => withReact(withHistory(createEditor())));
   return (<Slate editor={editor} initialValue={initialValue}>
-            <Editable {...props} style={{ ...props.style }} className="child-direction-ltr" />
+            <Editable {...props} style={{ ...props.style }} />
           </Slate>);
 };
