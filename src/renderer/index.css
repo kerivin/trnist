@@ -70,9 +70,10 @@ body {
   --color-splitter: transparent;
   --color-splitter-hover: black;
   --color-splitter-drag: orangered;
-  --color-border-tab-unselected: gray;
   --color-edge-marker: orangered;
   --color-edge-icon: transparent;
+  --color-tab-unselected: gray;
+  --color-border-tab-unselected: gray;
 
   overflow: clip;
   z-index: 0;
