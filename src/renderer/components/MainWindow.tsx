@@ -3,60 +3,122 @@ import { TextEditor } from './TextEditor';
 import { TextViewer } from './TextViewer';
 import { Panel, PanelGroup, PanelResizeHandle, ImperativePanelGroupHandle } from 'react-resizable-panels';
 import { BiChevronsLeft, BiChevronsRight } from 'react-icons/bi';
+import { Action, Layout, Model, TabNode, IJsonModel, IJsonTabNode, TabSetNode, BorderNode, ITabSetRenderValues, Actions, DockLocation, AddIcon } from 'flexlayout-react';
+import 'flexlayout-react/style/rounded.css';  
+
+const model_json: IJsonModel = {
+  global: {
+    enableEdgeDock: true,
+    splitterEnableHandle: false,
+    splitterSize: 3,
+    splitterExtra: 2,
+    tabDragSpeed: 0.05,
+    tabEnableRename: false,
+    tabEnablePopout: false,
+    tabMinWidth: 100,
+    tabMinHeight: 100,
+    tabEnableDrag: true,
+    tabSetEnableDrag: true,
+    tabSetEnableDrop: true,
+  },
+  borders: [
+    {
+      type: "border",
+      location: "left",
+      children: [
+        {
+          type: "tab",
+          name: "Spare Left Tab",
+          component: "placeholder",
+          enableClose: false,
+        },
+      ]
+    },
+    {
+      type: "border",
+      location: "right",
+      children: [
+        {
+          type: "tab",
+          name: "Spare Right Tab",
+          component: "placeholder",
+          enableClose: false,
+        },
+      ]
+    },
+  ],
+  layout: {
+    type: "row",
+    id: "Row",
+    weight: 100,
+    children: [
+      {
+        type: "tabset",
+        weight: 15,
+        children: [
+          {
+            type: "tab",
+            name: "Notes",
+            component: "placeholder",
+            id: "Notes",
+          }
+        ]
+      },
+      {
+        type: "tabset",
+        weight: 35,
+        children: [
+          {
+            type: "tab",
+            name: "Editor",
+            component: "TextEditor",
+            id: "TextEditor"
+          }
+        ]
+      },
+      {
+        type: "tabset",
+        weight: 35,
+        children: [
+          {
+            type: "tab",
+            name: "Viewer",
+            component: "TextViewer",
+            id: "TextViewer"
+          }
+        ]
+      },
+      {
+        type: "tabset",
+        weight: 15,
+        children: [
+          {
+            type: "tab",
+            name: "Machine Translation",
+            component: "placeholder",
+            id: "MachineTranslation",
+          }
+        ]
+      }
+    ]
+  }
+};
+
+const model = Model.fromJson(model_json);
 
 export const MainWindow = () => {
-  const defaultSizes = [15, 35, 35, 15];
-  const sticky_threshold = 1;
-  const center_x = 50;
 
-  const [isLeftCollapsed, isRightCollapsed] = useState(false);
-  const [isInStickyZone, setInStickyZone] = useState(false);
-  const [getActiveHandleIndex, setActiveHandleIndex] = useState<number | undefined>();
-  const panelGroupRef = useRef<ImperativePanelGroupHandle>(null);
-
-  const handleLayoutReset = () => {
-    panelGroupRef.current?.setLayout(defaultSizes);
-  };
-
-  const handleLayout = (sizes: number[]) => {
-    const handleIndex = getActiveHandleIndex;
-    if (handleIndex === undefined) return;
-
-    const handlePosition = sizes.slice(0, handleIndex + 1).reduce((a, b) => a + b, 0);
-    const distance = handlePosition - center_x;
-    setInStickyZone(Math.abs(distance) < sticky_threshold);
-
-    if (isInStickyZone) {
-      sizes[handleIndex] -= distance;
-      sizes[handleIndex + 1] += distance;
-      panelGroupRef.current?.setLayout(sizes);
+  const factory = (node: TabNode) => {
+    const component = node.getComponent();
+    switch (component) {
+      case "TextEditor":
+        return <TextEditor style={{ height: '100%', outline: 'none', boxShadow: 'none', overflow: 'auto', boxSizing: 'border-box', lineHeight: '1.5rem', direction: 'rtl' }} />;
+      case "TextViewer":
+        return <TextViewer style={{ height: '100%', outline: 'none', boxShadow: 'none', overflow: 'auto', boxSizing: 'border-box', lineHeight: '1.5rem' }} />;
+        default:
+          return <div>{"unknown component " + component}</div>
     }
   };
 
-  const handleDragging = (isDragging: boolean, handleIndex: number) => {
-    setActiveHandleIndex(isDragging ? handleIndex : undefined);
-  };
-
-  return (
-    <div style={{ width: '100vw', height: '100vh', scrollbarWidth: 'thin' }}>
-      <PanelGroup autoSaveId="layout" direction="horizontal" ref={panelGroupRef} onLayout={handleLayout}>
-        <Panel id="left-left" collapsible={true} minSize={5} defaultSize={defaultSizes[0]} collapsedSize={2}>
-          <span>Left Left</span>
-          <button onClick={handleLayoutReset}>Reset Layout</button>
-        </Panel>
-        <PanelResizeHandle className="resize-handle" />
-        <Panel id="left-middle" collapsible={false} minSize={20} defaultSize={defaultSizes[1]}>
-          <TextEditor style={{ padding: '2rem', width: '100%', height: '100%', outline: 'none', boxShadow: 'none', overflow: 'auto', boxSizing: 'border-box', lineHeight: '1.5rem', marginLeft: '-0.3rem', direction: 'rtl' }} />
-        </Panel>
-        <PanelResizeHandle className={`resize-handle ${getActiveHandleIndex === 1 && isInStickyZone ? 'sticky' : ''}`} onDragging={(dragging) => handleDragging(dragging, 1)} />
-        <Panel id="right-middle" collapsible={false} minSize={20} defaultSize={defaultSizes[2]}>
-          <TextViewer style={{ padding: '2rem', width: '100%', height: '100%', outline: 'none', boxShadow: 'none', overflow: 'auto', boxSizing: 'border-box', lineHeight: '1.5rem', marginLeft: '0.3rem' }} />
-        </Panel>
-        <PanelResizeHandle className="resize-handle" />
-        <Panel id="right-right" collapsible={true} minSize={5} defaultSize={defaultSizes[3]} collapsedSize={2}>
-          <span>Right Right</span>
-        </Panel>
-      </PanelGroup>
-    </div>
-  );
+  return(<Layout model={model} factory={factory} realtimeResize={false} />);
 };

@@ -50,3 +50,139 @@ body {
   cursor: default;
   border: 0;
 }
+
+
+.flexlayout__layout {
+  --color-background: black !important;
+  --color-drag1: orangered !important;
+  --color-drag2: orangered !important;
+  --color-drag1-background: rgb(255, 69, 0, 0.1) !important;
+  --color-drag2-background: rgb(255, 69, 0, 0.3) !important;
+  --color-splitter-hover: black !important;
+  --color-splitter-drag: black !important;
+  --color-splitter: transparent !important;
+
+  --tab-border-radius: 10px;
+}
+
+@media (hover: hover) {
+  .flexlayout__border_button:hover {
+    color: var(--color-tab-content) !important;
+  }
+  .flexlayout__border_button--selected:hover {
+    color: var(--color-border-tab-selected) !important;
+  }
+}
+
+.flexlayout__tabset, .flexlayout__outline_rect, .flexlayout__outline_rect_edge, .flexlayout__tabset, .flexlayout__tab_border, .flexlayout__border_tab_contents {
+  border-radius: var(--tab-border-radius) !important;
+}
+
+.flexlayout__tab_button, .flexlayout__border_button {
+  border-radius: 10px !important;
+}
+
+.flexlayout__splitter_drag {
+  border-radius: 0 !important;
+}
+
+.flexlayout__border_button_trailing {
+  visibility: visible !important;
+}
+
+/* 
+.flexlayout__layout {
+  --color-background: white !important;
+  --color-base: white !important;
+  --color-1: white !important;
+  --color-2: white !important;
+  --color-3: white !important;
+  --color-4: white !important;
+  --color-5: white !important;
+  --color-6: lightgray !important;
+  --color-drag1: orangered !important;
+  --color-drag2: orangered !important;
+  --color-drag1-background: rgb(255, 69, 0, 0.1) !important;
+  --color-drag2-background: rgb(255, 69, 0, 0.3) !important;
+  --color-underline: black !important;
+  --color-splitter: black !important;
+  --color-splitter-hover: black !important;
+  --color-splitter-drag: orangered !important;
+  --font-family: Roboto, Arial, sans-serif !important;
+  --color-icon: black !important;
+  --color-underline: black !important;
+  --color-edge-marker: blue !important;
+  --color-edge-icon: red !important;
+}
+
+.flexlayout__outline_rect {
+  border-radius: 0 !important;
+}
+
+.flexlayout__tab_button, .flexlayout__border_button {
+  border-radius: 0 !important;
+}
+
+.flexlayout__tab_button--selected {
+  text-decoration: dashed underline black 0.1rem !important;
+  text-underline-offset: 0.2rem !important;
+}
+
+.flexlayout__tabset {
+  padding: 3px !important;
+}
+
+.flexlayout__tabset_content {
+  padding: 2rem !important;
+  margin-left: 0.3rem !important;
+  margin-right: 0.3rem !important;
+}
+
+.flexlayout__outline_rect_edge {
+  border-radius: 0 !important;
+  border: 0.2rem solid var(--color-drag2) !important;
+  background: var(--color-drag2-background) !important;
+}
+
+.flexlayout__drag_rect {
+  border-radius: 0 !important;
+}
+
+.flexlayout__tabset {
+  border: 0 !important;
+}
+
+.flexlayout__tabset_tab_divider {
+  width: 1rem !important;
+}
+
+.flexlayout__splitter {
+  width: 0.1rem !important;
+  min-width: 0 !important;
+}
+.flexlayout__splitter_handle_horz {
+  width: 0.1rem !important;
+  min-width: 0 !important;
+}
+.flexlayout__splitter_handle_vert {
+  height: 0.1rem !important;
+  min-height: 0 !important;
+}
+
+.flexlayout__tabset_tabbar_outer {
+  border-bottom: 0.1rem solid black !important;
+}
+
+.flexlayout__tabset {
+  border: 0 !important;
+}
+
+.flexlayout__border_toolbar_left, .flexlayout__border_toolbar_right {
+  padding-top: 0 !important;
+  padding-bottom: 0 !important;
+}
+
+.flexlayout__border_inner {
+  border-left: 0.1rem black solid !important;
+  border-right: 0.1rem black solid !important;
+} */
