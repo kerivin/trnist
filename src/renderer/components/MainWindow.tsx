@@ -1,7 +1,6 @@
 import { useState, useRef } from 'react';
 import { TextEditor } from './TextEditor';
 import { TextViewer } from './TextViewer';
-import { Panel, PanelGroup, PanelResizeHandle, ImperativePanelGroupHandle } from 'react-resizable-panels';
 import { BiChevronsLeft, BiChevronsRight } from 'react-icons/bi';
 import { Action, Layout, Model, TabNode, IJsonModel, IJsonTabNode, TabSetNode, BorderNode, ITabSetRenderValues, Actions, DockLocation, AddIcon } from 'flexlayout-react';
 import 'flexlayout-react/style/rounded.css';  
