@@ -58,9 +58,9 @@ body {
   --color-drag2: orangered !important;
   --color-drag1-background: rgb(255, 69, 0, 0.1) !important;
   --color-drag2-background: rgb(255, 69, 0, 0.3) !important;
-  --color-splitter-hover: black !important;
-  --color-splitter-drag: black !important;
   --color-splitter: transparent !important;
+  --color-splitter-hover: transparent !important;
+  --color-splitter-drag: orangered !important;
 
   --tab-border-radius: 10px;
 }
@@ -70,7 +70,7 @@ body {
     color: var(--color-tab-content) !important;
   }
   .flexlayout__border_button--selected:hover {
-    color: var(--color-border-tab-selected) !important;
+    color: inherit !important;
   }
 }
 
@@ -88,4 +88,9 @@ body {
 
 .flexlayout__border_button_trailing {
   visibility: visible !important;
+}
+
+.flexlayout__tab_button, .flexlayout__border_button {
+  padding-left: 0.4rem !important;
+  padding-right: 0.4rem !important;
 }
