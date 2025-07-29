@@ -168,10 +168,6 @@ body {
   right: -0.3rem;
 }
 
-/* .layout_theme .flexlayout__tabset_tabbar_inner_tab_container, .layout_theme .flexlayout__border_inner_tab_container {
-  gap: 0.5rem;
-} */
-
 .layout_theme .flexlayout__popup_menu {
   background-color: var(--color-background);
   border: var(--default-size) solid black;
