@@ -188,3 +188,7 @@ body {
 .layout_theme .flexlayout__tabset_tabbar_inner {
   position: initial;
 }
+
+.layout_theme .flexlayout__tab_toolbar_button {
+  cursor: pointer;
+}
