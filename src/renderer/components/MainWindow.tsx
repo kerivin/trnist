@@ -27,7 +27,7 @@ const model_json: IJsonModel = {
       children: [
         {
           type: "tab",
-          name: "Spare Left Tab",
+          name: "SPARE LEFT TAB",
           component: "placeholder",
           enableClose: true,
         },
@@ -39,7 +39,7 @@ const model_json: IJsonModel = {
       children: [
         {
           type: "tab",
-          name: "Spare Right Tab",
+          name: "SPARE RIGHT TAB",
           component: "placeholder",
           enableClose: true,
         },
@@ -57,7 +57,7 @@ const model_json: IJsonModel = {
         children: [
           {
             type: "tab",
-            name: "Notes",
+            name: "NOTES",
             component: "TextEditor",
             id: "Notes",
           }
@@ -69,7 +69,7 @@ const model_json: IJsonModel = {
         children: [
           {
             type: "tab",
-            name: "Editor",
+            name: "EDITOR",
             component: "TextEditor",
             id: "TextEditor",
             enableClose: false,
@@ -82,7 +82,7 @@ const model_json: IJsonModel = {
         children: [
           {
             type: "tab",
-            name: "Viewer",
+            name: "VIEWER",
             component: "TextViewer",
             id: "TextViewer",
             enableClose: false,
@@ -95,7 +95,7 @@ const model_json: IJsonModel = {
         children: [
           {
             type: "tab",
-            name: "Machine Translation",
+            name: "ONLINE TRANSLATION",
             component: "placeholder",
             id: "MachineTranslation",
           }
