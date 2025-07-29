@@ -41,8 +41,7 @@ body {
   min-height: var(--scrollbar-min-height);
   min-width: var(--scrollbar-min-height);
   overflow: hidden;
-  border-style: solid;
-  border-color: transparent;
+  border: var(--scrollbar-border-width) solid transparent;
   background-clip: padding-box;
 }
 
@@ -151,21 +150,28 @@ body {
   font-family: var(--font-family);
 }
 
-/* where drop aims to */
+/* popup menu included */
 .layout_theme .flexlayout__tab_button_content, .layout_theme .flexlayout__border_button_content {
-  padding-left: 1rem;
-  padding-right: 1rem;
+  padding-left: 0.5rem;
+  padding-right: 0.5rem;
 }
 
+/* popup menu excluded */
 .layout_theme .flexlayout__tab_button, .layout_theme .flexlayout__border_button {
   position: relative;
-  padding-left: 0.1rem;
-  padding-right: 0.1rem;
+  padding-left: 0rem;
+  padding-right: 1rem;
 }
 
 .layout_theme .flexlayout__tab_button_trailing, .layout_theme .flexlayout__border_button_trailing {
   position: absolute;
-  right: -0.3rem;
+  right: 0;
+  border-radius: 0;
+}
+
+.layout_theme .flexlayout__tab_button_trailing:hover, .layout_theme .flexlayout__border_button_trailing:hover {
+  fill: white;
+  background-color: orangered;
 }
 
 .layout_theme .flexlayout__popup_menu {
