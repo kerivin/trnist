@@ -6,6 +6,6 @@ export interface TranslationResult {
   raw?: any;
 }
 
-export default interface Translator {
-  translate(text: string, from: string, to: string): Promise<TranslationResult>;
+export default interface Translator<Options = unknown> {
+  translate(text: string, from: string, to: string, options?: Options): Promise<TranslationResult>;
 }

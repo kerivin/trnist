@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import Translators, { TranslatorName } from '../../shared/translator/translators';
+import { Translators, TranslatorName, TranslatorOptions } from '../../shared/translator/translators';
 
 const MachineTranslation: React.FC = () => {
   const [text, setText] = useState('');
@@ -15,7 +15,7 @@ const MachineTranslation: React.FC = () => {
     setLoading(true);
     setError('');
     try {
-      const translation = await Translators[service].translate(text, from, to);
+      const translation = await Translators[service].translate(text, from, to, TranslatorOptions[service]);
       setResult(translation.text);
     } catch (e: any) {
       setError('Translation failed: ' + (e.message || e.toString()));
