@@ -6,7 +6,6 @@ export default function App() {
   return(<MainWindow />);
 }
 
-console.log('✅ React App Mounted');
 const rootElement = document.getElementById('root') as HTMLElement;
 const root = createRoot(rootElement);
 root.render(<App />);

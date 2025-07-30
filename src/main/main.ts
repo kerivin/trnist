@@ -20,7 +20,7 @@ const createWindow = () => {
   console.log('Preload path:', path.join(__dirname, 'preload.js'));
   console.log('Renderer path:', path.join(__dirname, '../index.html'));
   mainWindow.loadFile(path.join(__dirname, `../index.html`));
-  mainWindow.webContents.openDevTools();
+  // mainWindow.webContents.openDevTools();
 };
 
 app.on('ready', createWindow);

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import Translator from '../../shared/translator';
 
 export type Service = 'google' | 'mymemory' | 'yandex';
@@ -31,13 +31,6 @@ const MachineTranslation: React.FC = () => {
       setLoading(false);
     }
   };
-
-  useEffect(() => {
-    console.log('💡 Is translatorAPI defined?', !!window.translatorAPI);
-    if (!window.translatorAPI) {
-      alert('translatorAPI is undefined — check preload');
-    }
-  }, []);
 
   return (
     <div className="max-w-xl mx-auto p-4">
