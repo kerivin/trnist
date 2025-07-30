@@ -1,19 +1,11 @@
 import React, { useState } from 'react';
-import Translator from '../../shared/translator';
-
-export type Service = 'google' | 'mymemory' | 'yandex';
-
-declare global {
-  interface Window {
-    translatorAPI: Record<Service, Translator['translate']>;
-  }
-}
+import Translators, { TranslatorName } from '../../shared/translator/translators';
 
 const MachineTranslation: React.FC = () => {
   const [text, setText] = useState('');
-  const [from, setFrom] = useState('auto');
-  const [to, setTo] = useState('en');
-  const [service, setService] = useState<Service>('google');
+  const [from, setFrom] = useState('en');
+  const [to, setTo] = useState('ru');
+  const [service, setService] = useState<TranslatorName>('google');
   const [result, setResult] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -23,8 +15,8 @@ const MachineTranslation: React.FC = () => {
     setLoading(true);
     setError('');
     try {
-      const translation = await window.translatorAPI[service](text, from, to);
-      setResult(translation);
+      const translation = await Translators[service].translate(text, from, to);
+      setResult(translation.text);
     } catch (e: any) {
       setError('Translation failed: ' + (e.message || e.toString()));
     } finally {
@@ -62,7 +54,7 @@ const MachineTranslation: React.FC = () => {
       <select
         className="w-full p-2 border rounded mb-2"
         value={service}
-        onChange={(e) => setService(e.target.value as Service)}
+        onChange={(e) => setService(e.target.value as TranslatorName)}
       >
         <option value="google">Google</option>
         <option value="mymemory">MyMemory</option>

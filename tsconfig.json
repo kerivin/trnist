@@ -14,5 +14,6 @@
     "baseUrl": ".",
     "moduleResolution": "node",
     "resolveJsonModule": true
-  }
+  },
+  "include": ["src/global.d.ts", "src/**/*"]
 }
