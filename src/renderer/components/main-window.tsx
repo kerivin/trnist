@@ -1,6 +1,6 @@
-import { useState, useRef } from 'react';
-import { TextEditor } from './TextEditor';
-import { TextViewer } from './TextViewer';
+import Editor from './editor';
+import Viewer from './viewer';
+import MachineTranslation from './machine-translation';
 import { BiChevronsLeft, BiChevronsRight } from 'react-icons/bi';
 import { Action, Layout, Model, TabNode, IJsonModel, IJsonTabNode, TabSetNode, BorderNode, ITabSetRenderValues, Actions, DockLocation, AddIcon } from 'flexlayout-react';
 import 'flexlayout-react/style/combined.css';  
@@ -70,8 +70,8 @@ const model_json: IJsonModel = {
           {
             type: "tab",
             name: "EDITOR",
-            component: "TextEditor",
-            id: "TextEditor",
+            component: "Editor",
+            id: "Editor",
             enableClose: false,
           }
         ]
@@ -83,8 +83,8 @@ const model_json: IJsonModel = {
           {
             type: "tab",
             name: "VIEWER",
-            component: "TextViewer",
-            id: "TextViewer",
+            component: "Viewer",
+            id: "Viewer",
             enableClose: false,
           }
         ]
@@ -95,8 +95,8 @@ const model_json: IJsonModel = {
         children: [
           {
             type: "tab",
-            name: "ONLINE TRANSLATION",
-            component: "placeholder",
+            name: "MACHINE TRANSLATION",
+            component: "MachineTranslation",
             id: "MachineTranslation",
           }
         ]
@@ -113,13 +113,21 @@ export const MainWindow = () => {
     const component = node.getComponent();
     switch (component) {
       case "TextEditor":
-        return <TextEditor style={{ height: '100%', outline: 'none', boxShadow: 'none', overflow: 'auto', boxSizing: 'border-box', lineHeight: '1.5rem' }} />;
+        return <Editor style={{
+          height: '100%', outline: 'none', boxShadow: 'none', overflow: 'auto',
+          boxSizing: 'border-box', lineHeight: '1.5rem'
+        }} />;
       case "TextViewer":
-        return <TextViewer style={{ height: '100%', outline: 'none', boxShadow: 'none', overflow: 'auto', boxSizing: 'border-box', lineHeight: '1.5rem' }} />;
-        default:
-          return <div>{"unknown component " + component}</div>
+        return <Viewer style={{
+          height: '100%', outline: 'none', boxShadow: 'none', overflow: 'auto',
+          boxSizing: 'border-box', lineHeight: '1.5rem'
+        }} />;
+      case "MachineTranslation":
+        return <MachineTranslation />;
+      default:
+        return <div>{"unknown component " + component}</div>
     }
   };
 
-  return(<div className='layout_theme'><Layout model={model} factory={factory} realtimeResize={false} /></div>);
+  return (<div className='layout_theme'><Layout model={model} factory={factory} realtimeResize={false} /></div>);
 };

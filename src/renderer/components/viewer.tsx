@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { createEditor, Descendant } from 'slate';
 import { withReact, Slate, Editable } from 'slate-react';
-import '../../lib/slate-types';
+import './slate-types';
 
 const initialValue: Descendant[] = [
   {
@@ -10,9 +10,11 @@ const initialValue: Descendant[] = [
   },
 ];
 
-export const TextViewer = ({ ...props }) => {
+const TextViewer = ({ ...props }) => {
   const [editor] = useState(() => withReact(createEditor()));
   return (<Slate editor={editor} initialValue={initialValue}>
             <Editable {...props} style={{ ...props.style }} spellCheck={false} readOnly={true} />
           </Slate>);
 };
+
+export default TextViewer;

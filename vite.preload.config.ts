@@ -1,6 +1,16 @@
 import { defineConfig } from 'vite';
-import react from '@vitejs/plugin-react';
+import { builtinModules } from 'module';
 
 export default defineConfig({
-  plugins: [react()]
+  build: {
+    lib: {
+      entry: 'src/main/preload.ts',
+      formats: ['cjs'],
+    },
+    rollupOptions: {
+      external: ['electron', ...builtinModules],
+    },
+    outDir: 'dist/main',
+    emptyOutDir: false,
+  },
 });
