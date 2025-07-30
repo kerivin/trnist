@@ -1,106 +1,55 @@
 import Translator, { TranslationResult } from '../translator';
 
-declare global {
-  interface Window {
-    electron: {
-      cookies: {
-        getCookies(domain: string): Promise<string>;
-      };
-    };
-  }
-}
-
-
 export class YandexOptions {
+  iamToken?: string;
   apiKey?: string;
+  folderId?: string;
 }
 
 export default class YandexTranslator implements Translator<YandexOptions> {
-  async translate(text: string, from: string, to: string, options: YandexOptions = new YandexOptions()): Promise<TranslationResult> {
-    if (options.apiKey) {
-      return this.translateOfficialAPI(text, from, to, options.apiKey);
-    } else {
-      return this.translateExperimental(text, from, to);
+  async translate(text: string, from: string, to: string, options: YandexOptions): Promise<TranslationResult> {
+    const endpoint = 'https://translate.api.cloud.yandex.net/translate/v2/translate';
+
+    if (!options.apiKey && !options.iamToken) {
+      throw new Error('Yandex API-key or IAM-token is required');
     }
-  }
 
-  private async translateOfficialAPI(text: string, from: string, to: string, apiKey: string): Promise<TranslationResult> {
-    const url = `https://translate.yandex.net/api/v1.5/tr.json/translate?key=${apiKey}&lang=${from}-${to}&text=${encodeURIComponent(text)}`;
-    const res = await fetch(url);
-    const data = await res.json();
-    return {
-      text: data.text.join(' '),
-      raw: data
+    const headers: Record<string, string> = {
+      'Content-Type': 'application/json',
+      'Authorization': `${options.iamToken ? 'Bearer' : 'Api-Key'} ${options.apiKey}`,
     };
-  }
 
-  private async translateExperimental(text: string, from: string, to: string): Promise<TranslationResult> {
-    const homepageUrl = 'https://translate.yandex.com/';
-    const userAgent = navigator.userAgent;
+    const body: Record<string, any> = {
+      sourceLanguageCode: from,
+      targetLanguageCode: to,
+      texts: [text],
+      format: 'PLAIN_TEXT',
+    };
 
-    await new Promise<void>((resolve) => {
-      const iframe = document.createElement('iframe');
-      iframe.style.display = 'none';
-      iframe.src = homepageUrl;
-      iframe.onload = () => {
-        console.log('[Yandex] iframe loaded');
-        setTimeout(() => {
-          document.body.removeChild(iframe);
-          resolve();
-        }, 1000); // wait for JS cookie setting
-      };
-      document.body.appendChild(iframe);
-    });
+    if (options.iamToken && options.folderId) {
+      body.folderId = options.folderId;
+    }
 
-    const homepageRes = await fetch(homepageUrl, {
-      credentials: 'include',
-      headers: {
-        'User-Agent': userAgent,
-      },
-    });
-
-    const html = await homepageRes.text();
-
-    const sidMatch = html.match(/SID["']?\s*[:=]\s*["']([^"'\\]+)/i);
-    if (!sidMatch) throw new Error('Yandex SID not found');
-    const sid = sidMatch[1];
-
-    const yu = document.cookie.match(/yu=([^;]+)/)?.[1];
-    if (!yu) throw new Error('Yandex yu cookie still not found after iframe trick');
-
-    const id = `${sid}-1-0`;
-    const url =
-      `https://translate.yandex.net/api/v1/tr.json/translate` +
-      `?id=${id}&srv=tr-text&source_lang=${from}&target_lang=${to}` +
-      `&reason=auto&format=text&strategy=0&disable_cache=false&ajax=1&yu=${yu}`;
-
-    const res = await fetch(url, {
+    const res = await fetch(endpoint, {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/x-www-form-urlencoded',
-        'X-Retpath-Y': homepageUrl,
-        'Origin': homepageUrl,
-        'Referer': homepageUrl,
-        'User-Agent': userAgent,
-      },
-      body: new URLSearchParams({
-        text,
-        options: '4',
-      }),
-      credentials: 'include',
+      headers,
+      body: JSON.stringify(body),
     });
 
     if (!res.ok) {
-      throw new Error(`Yandex unofficial API responded with ${res.status}`);
+      const error = await res.text();
+      throw new Error(`Yandex API responded with ${res.status}: ${error}`);
     }
 
     const json = await res.json();
-    if (!json?.text || !Array.isArray(json.text)) {
-      throw new Error('Malformed Yandex response');
+    const translated = json.translations?.[0]?.text;
+
+    if (!translated) {
+      throw new Error('Yandex API did not return a translation');
     }
 
     return {
-      text: json.text.join(' '),
+      text: translated,
       raw: json,
     };
   }
