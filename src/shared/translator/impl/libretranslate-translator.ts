@@ -1,11 +1,13 @@
 import Translator, { TranslationResult } from '../translator';
 
 export class LibreTranslateOptions {
-  endpoint?: string = 'https://libretranslate.com';
+  endpoint: string = 'https://libretranslate.com';
+  apiKey?: string;
 }
 
 export default class LibreTranslateTranslator implements Translator<LibreTranslateOptions> {
-  async translate(text: string, from: string, to: string, options: LibreTranslateOptions = new LibreTranslateOptions()): Promise<TranslationResult> {
+  async translate(text: string, from: string, to: string, options: LibreTranslateOptions = new LibreTranslateOptions()): Promise<TranslationResult>
+  {
     const res = await fetch(`${options.endpoint}/translate`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -13,7 +15,7 @@ export default class LibreTranslateTranslator implements Translator<LibreTransla
         q: text,
         source: from,
         target: to,
-        format: 'text'
+        api_key: options.apiKey,
       })
     });
 

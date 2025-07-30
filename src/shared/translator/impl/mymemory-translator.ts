@@ -13,7 +13,6 @@ export default class MyMemoryTranslator implements Translator<MyMemoryOptions> {
 
     return {
       text: data.responseData.translatedText,
-      // examples: data.matches?.map((m: any) => m.translation),
       raw: data
     };
   }

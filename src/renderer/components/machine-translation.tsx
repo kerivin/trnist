@@ -6,7 +6,7 @@ const MachineTranslation: React.FC = () => {
   const [text, setText] = useState('');
   const [from, setFrom] = useState('en');
   const [to, setTo] = useState('ru');
-  const [service, setService] = useState<TranslatorName>('google');
+  const [service, setService] = useState<TranslatorName>('mymemory');
   const [result, setResult] = useState<TranslationResult>();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
