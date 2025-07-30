@@ -5,7 +5,8 @@ export class MyMemoryOptions {
 };
 
 export default class MyMemoryTranslator implements Translator<MyMemoryOptions> {
-  async translate(text: string, from: string, to: string, options: MyMemoryOptions = new MyMemoryOptions()): Promise<TranslationResult> {
+  async translate(text: string, from: string, to: string, options: MyMemoryOptions = new MyMemoryOptions()): Promise<TranslationResult>
+  {
     const url = `https://api.mymemory.translated.net/get?q=${encodeURIComponent(text)}&langpair=${from}|${to}` +
       (options.onlyPrivate ? '&onlyprivate=1' : '');
     const res = await fetch(url);

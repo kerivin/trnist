@@ -5,6 +5,7 @@ import YandexTranslator, { YandexOptions } from './impl/yandex-translator';
 import LibreTranslateTranslator, { LibreTranslateOptions } from './impl/libretranslate-translator';
 import ApertiumTranslator, { ApertiumOptions } from './impl/apertium-translator';
 import DeepLTranslator, { DeepLOptions } from './impl/deepl-translator';
+import ReversoTranslator, { ReversoOptions } from './impl/reverso-translator';
 
 export type TranslatorName =
     'mymemory'
@@ -12,7 +13,8 @@ export type TranslatorName =
   | 'yandex'
   | 'libretranslate'
   | 'apertium'
-  | 'deepl';
+  | 'deepl'
+  | 'reverso';
 
 interface TranslatorOptionsMap {
   mymemory: MyMemoryOptions;
@@ -21,6 +23,7 @@ interface TranslatorOptionsMap {
   libretranslate: LibreTranslateOptions;
   apertium: ApertiumOptions;
   deepl: DeepLOptions;
+  reverso: ReversoOptions;
 }
 
 export const TranslatorOptions: Record<TranslatorName, TranslatorOptionsMap[TranslatorName]> = {
@@ -30,6 +33,7 @@ export const TranslatorOptions: Record<TranslatorName, TranslatorOptionsMap[Tran
   libretranslate: new LibreTranslateOptions(),
   apertium: new ApertiumOptions(),
   deepl: new DeepLOptions(),
+  reverso: new ReversoOptions(),
 };
 
 export const Translators : Record<TranslatorName, Translator<TranslatorOptionsMap[TranslatorName]>> = {
@@ -39,4 +43,5 @@ export const Translators : Record<TranslatorName, Translator<TranslatorOptionsMa
   libretranslate: new LibreTranslateTranslator(),
   apertium: new ApertiumTranslator(),
   deepl: new DeepLTranslator(),
+  reverso: new ReversoTranslator(),
 };
