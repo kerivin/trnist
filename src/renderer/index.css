@@ -1,6 +1,6 @@
 @font-face {
   font-family: 'VT323';
-  src: url('assets/fonts/VT323-Regular.ttf') format('truetype');
+  src: url('../assets/fonts/VT323-Regular.ttf') format('truetype');
   font-weight: 300;
   font-display: swap;
 }
@@ -25,8 +25,10 @@ body {
   --scrollbar-border-width: calc((var(--scrollbar-full-width) - var(--scrollbar-small-width)) / 2);
 
   --tab-conent-padding-right: 0.5rem;
-  --scroll-margin: calc((var(--scrollbar-full-width) - var(--scrollbar-small-width)) / -2);
-  --tab-content-margin: 0 calc(var(--scroll-margin) - var(--tab-conent-padding-right)) 0 0; /* <- makes scrollbar closer to the edge */
+  /* --scroll-margin: calc((var(--scrollbar-full-width) - var(--scrollbar-small-width)) / -2);
+  --tab-content-margin: 0 calc(var(--scroll-margin) - var(--tab-conent-padding-right)) 0 0;
+  --tab-content-padding: 0 var(--tab-conent-padding-right) 0 var(--tab-conent-padding-right); */
+  --tab-content-margin: 0;
   --tab-content-padding: 0 var(--tab-conent-padding-right) 0 var(--tab-conent-padding-right);
 }
 
@@ -65,6 +67,8 @@ body {
 .layout_theme .flexlayout__tab_moveable {
   margin: var(--tab-content-margin);
   padding: var(--tab-content-padding);
+  width: 100%;
+  overflow-x: clip;
 }
 
 .layout_theme .flexlayout__layout {

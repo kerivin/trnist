@@ -19,9 +19,15 @@ export default class MyMemoryTranslator implements Translator<MyMemoryOptions> {
     const res = await fetch(url);
     const data = await res.json();
 
+    const examples = (data.matches || [])
+      .filter((m: any) => m.translation && m.match > 0.5)
+      .map((m: any) => m.translation)
+      .filter((v: string, i: number, arr: string[]) => arr.indexOf(v) === i);
+
     return {
       text: data.responseData.translatedText,
-      raw: data
+      examples,
+      raw: data,
     };
   }
 }

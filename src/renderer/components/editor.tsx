@@ -11,11 +11,11 @@ const initialValue: Descendant[] = [
   },
 ];
 
-const TextEditor = ({ ...props }) => {
+const Editor = ({ ...props }) => {
   const [editor] = useState(() => withReact(withHistory(createEditor())));
   return (<Slate editor={editor} initialValue={initialValue}>
             <Editable {...props} style={{ ...props.style }} />
           </Slate>);
 };
 
-export default TextEditor;
+export default Editor;

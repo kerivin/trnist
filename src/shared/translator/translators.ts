@@ -8,40 +8,40 @@ import DeepLTranslator, { DeepLOptions } from './impl/deepl-translator';
 import ReversoTranslator, { ReversoOptions } from './impl/reverso-translator';
 
 export type TranslatorName =
-    'mymemory'
-  | 'google'
-  | 'yandex'
-  | 'libretranslate'
-  | 'apertium'
-  | 'deepl'
-  | 'reverso';
+    'MyMemory'
+  | 'Google'
+  | 'Yandex'
+  | 'LibreTranslate'
+  | 'Apertium'
+  | 'DeepL'
+  | 'Reverso';
 
 interface TranslatorOptionsMap {
-  mymemory: MyMemoryOptions;
-  google: GoogleOptions;
-  yandex: YandexOptions;
-  libretranslate: LibreTranslateOptions;
-  apertium: ApertiumOptions;
-  deepl: DeepLOptions;
-  reverso: ReversoOptions;
+  MyMemory: MyMemoryOptions;
+  Google: GoogleOptions;
+  Yandex: YandexOptions;
+  LibreTranslate: LibreTranslateOptions;
+  Apertium: ApertiumOptions;
+  DeepL: DeepLOptions;
+  Reverso: ReversoOptions;
 }
 
 export const TranslatorOptions: Record<TranslatorName, TranslatorOptionsMap[TranslatorName]> = {
-  mymemory: new MyMemoryOptions(),
-  google: new GoogleOptions(),
-  yandex: new YandexOptions(),
-  libretranslate: new LibreTranslateOptions(),
-  apertium: new ApertiumOptions(),
-  deepl: new DeepLOptions(),
-  reverso: new ReversoOptions(),
+  MyMemory: new MyMemoryOptions(),
+  Google: new GoogleOptions(),
+  Yandex: new YandexOptions(),
+  LibreTranslate: new LibreTranslateOptions(),
+  Apertium: new ApertiumOptions(),
+  DeepL: new DeepLOptions(),
+  Reverso: new ReversoOptions(),
 };
 
 export const Translators : Record<TranslatorName, Translator<TranslatorOptionsMap[TranslatorName]>> = {
-  mymemory: new MyMemoryTranslator(),
-  google: new GoogleTranslator(),
-  yandex: new YandexTranslator(),
-  libretranslate: new LibreTranslateTranslator(),
-  apertium: new ApertiumTranslator(),
-  deepl: new DeepLTranslator(),
-  reverso: new ReversoTranslator(),
+  MyMemory: new MyMemoryTranslator(),
+  Google: new GoogleTranslator(),
+  Yandex: new YandexTranslator(),
+  LibreTranslate: new LibreTranslateTranslator(),
+  Apertium: new ApertiumTranslator(),
+  DeepL: new DeepLTranslator(),
+  Reverso: new ReversoTranslator(),
 };

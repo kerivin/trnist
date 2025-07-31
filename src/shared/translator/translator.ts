@@ -1,6 +1,5 @@
 export interface TranslationResult {
   text: string;
-
   examples?: string[];
   confidence?: number;
   raw?: any;

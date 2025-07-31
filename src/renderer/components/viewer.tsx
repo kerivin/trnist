@@ -10,11 +10,11 @@ const initialValue: Descendant[] = [
   },
 ];
 
-const TextViewer = ({ ...props }) => {
+const Viewer = ({ ...props }) => {
   const [editor] = useState(() => withReact(createEditor()));
   return (<Slate editor={editor} initialValue={initialValue}>
             <Editable {...props} style={{ ...props.style }} spellCheck={false} readOnly={true} />
           </Slate>);
 };
 
-export default TextViewer;
+export default Viewer;

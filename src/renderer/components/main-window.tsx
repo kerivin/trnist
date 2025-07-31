@@ -58,7 +58,7 @@ const model_json: IJsonModel = {
           {
             type: "tab",
             name: "NOTES",
-            component: "TextEditor",
+            component: "Editor",
             id: "Notes",
           }
         ]
@@ -112,12 +112,12 @@ export const MainWindow = () => {
   const factory = (node: TabNode) => {
     const component = node.getComponent();
     switch (component) {
-      case "TextEditor":
+      case "Editor":
         return <Editor style={{
           height: '100%', outline: 'none', boxShadow: 'none', overflow: 'auto',
           boxSizing: 'border-box', lineHeight: '1.5rem'
         }} />;
-      case "TextViewer":
+      case "Viewer":
         return <Viewer style={{
           height: '100%', outline: 'none', boxShadow: 'none', overflow: 'auto',
           boxSizing: 'border-box', lineHeight: '1.5rem'
