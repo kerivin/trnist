@@ -1,5 +1,5 @@
-import Editor from './editor';
-import Viewer from './viewer';
+import TextEditor from './text-editor';
+import TextViewer from './text-viewer';
 import MachineTranslation from './machine-translation';
 import { BiChevronsLeft, BiChevronsRight } from 'react-icons/bi';
 import { Action, Layout, Model, TabNode, IJsonModel, IJsonTabNode, TabSetNode, BorderNode, ITabSetRenderValues, Actions, DockLocation, AddIcon } from 'flexlayout-react';
@@ -58,7 +58,7 @@ const model_json: IJsonModel = {
           {
             type: "tab",
             name: "NOTES",
-            component: "Editor",
+            component: "TextEditor",
             id: "Notes",
           }
         ]
@@ -70,8 +70,8 @@ const model_json: IJsonModel = {
           {
             type: "tab",
             name: "EDITOR",
-            component: "Editor",
-            id: "Editor",
+            component: "TextEditor",
+            id: "TextEditor",
             enableClose: false,
           }
         ]
@@ -83,8 +83,8 @@ const model_json: IJsonModel = {
           {
             type: "tab",
             name: "VIEWER",
-            component: "Viewer",
-            id: "Viewer",
+            component: "TextViewer",
+            id: "TextViewer",
             enableClose: false,
           }
         ]
@@ -112,13 +112,13 @@ export const MainWindow = () => {
   const factory = (node: TabNode) => {
     const component = node.getComponent();
     switch (component) {
-      case "Editor":
-        return <Editor style={{
+      case "TextEditor":
+        return <TextEditor style={{
           height: '100%', outline: 'none', boxShadow: 'none', overflow: 'auto',
           boxSizing: 'border-box', lineHeight: '1.5rem'
         }} />;
-      case "Viewer":
-        return <Viewer style={{
+      case "TextViewer":
+        return <TextViewer style={{
           height: '100%', outline: 'none', boxShadow: 'none', overflow: 'auto',
           boxSizing: 'border-box', lineHeight: '1.5rem'
         }} />;

@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { createEditor, Descendant } from 'slate';
+import { createEditor, Descendant, Editor } from 'slate';
 import { withReact, Slate, Editable } from 'slate-react';
 import './slate-types';
 
@@ -10,11 +10,12 @@ const initialValue: Descendant[] = [
   },
 ];
 
-const Viewer = ({ ...props }) => {
+const TextViewer = ({ ...props }) => {
   const [editor] = useState(() => withReact(createEditor()));
+  editor.getChunkSize = node => (Editor.isEditor(node) ? 1000 : null);
   return (<Slate editor={editor} initialValue={initialValue}>
             <Editable {...props} style={{ ...props.style }} spellCheck={false} readOnly={true} />
           </Slate>);
 };
 
-export default Viewer;
+export default TextViewer;

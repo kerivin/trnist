@@ -38,6 +38,10 @@ body {
   overflow: hidden;
 }
 
+::-webkit-scrollbar-corner {
+  background: transparent;
+}
+
 ::-webkit-scrollbar-thumb {
   background: orangered;
   min-height: var(--scrollbar-min-height);
