@@ -1,29 +1,24 @@
 {
   "compilerOptions": {
-    "target": "ESNext",
-    "module": "CommonJS",
-    "moduleResolution": "node",
-    "outDir": "dist",
+    "target": "esnext",
     "jsx": "react-jsx",
-    "lib": ["ESNext", "DOM"],
-    "allowJs": false,
-    "strict": false,
-    "skipLibCheck": true,
+    "module": "NodeNext",
+    "moduleResolution": "NodeNext",
+    "strict": true,
     "esModuleInterop": true,
-    "noImplicitAny": true,
-    "sourceMap": true,
-    "resolveJsonModule": true,
+    "skipLibCheck": true,
     "baseUrl": ".",
     "paths": {
-      "~shared/*": ["src/shared/*"],
-      "~components/*": ["src/components/*"]
+      "@/*": ["src/renderer/*"],
+      "@main/*": ["src/main/*"],
+      "@preload/*": ["src/preload/*"],
+      "@assets/*": ["src/renderer/assets/*"],
+      "pdfjs-dist": ["node_modules/pdfjs-dist/types/src/pdf.d.ts"]
     }
   },
   "include": [
     "src/global.d.ts",
-    "src/**/*"
-  ],
-  "exclude": [
-    "node_modules"
+    "src/**/*.ts",
+    "src/**/*.tsx"
   ]
 }

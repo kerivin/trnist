@@ -11,15 +11,17 @@ const createWindow = () => {
     width: 1600,
     height: 800,
     webPreferences: {
-      preload: path.join(__dirname, 'preload.js'),
+      preload: path.join(__dirname, '../preload/preload.js'),
       nodeIntegration: false,
       contextIsolation: true,
+      plugins: false,
+      sandbox: true,
     },
   });
 
-  console.log('Preload path:', path.join(__dirname, 'preload.js'));
-  console.log('Renderer path:', path.join(__dirname, '../index.html'));
-  mainWindow.loadFile(path.join(__dirname, `../index.html`));
+  console.log('Preload path:', path.join(__dirname, '../preload/preload.js'));
+  console.log('Renderer path:', path.join(__dirname, '../renderer/index.html'));
+  mainWindow.loadFile(path.join(__dirname, `../renderer/index.html`));
   // mainWindow.webContents.openDevTools();
 };
 

@@ -1,5 +1,6 @@
 import TextEditor from './text-editor';
 import TextViewer from './text-viewer';
+import PdfViewer from './pdf-viewer';
 import MachineTranslation from './machine-translation';
 import { BiChevronsLeft, BiChevronsRight } from 'react-icons/bi';
 import { Action, Layout, Model, TabNode, IJsonModel, IJsonTabNode, TabSetNode, BorderNode, ITabSetRenderValues, Actions, DockLocation, AddIcon } from 'flexlayout-react';
@@ -86,6 +87,13 @@ const model_json: IJsonModel = {
             component: "TextViewer",
             id: "TextViewer",
             enableClose: false,
+          },
+          {
+            type: "tab",
+            name: "PDF VIEWER",
+            component: "PdfViewer",
+            id: "PdfViewer",
+            enableClose: false,
           }
         ]
       },
@@ -122,6 +130,8 @@ export const MainWindow = () => {
           height: '100%', outline: 'none', boxShadow: 'none', overflow: 'auto',
           boxSizing: 'border-box', lineHeight: '1.5rem'
         }} />;
+      case "PdfViewer":
+        return <div />;
       case "MachineTranslation":
         return <MachineTranslation />;
       default:

@@ -5,17 +5,16 @@
   "description": "Book Translationist",
   "main": "dist/main/main.js",
   "scripts": {
-    "build:main": "vite build --config vite.main.config.ts",
-    "build:preload": "vite build --config vite.preload.config.ts",
-    "build:renderer": "vite build --config vite.renderer.config.ts",
-    "build": "npm run build:main && npm run build:preload && npm run build:renderer",
-    "start": "npm run build && electron-forge start",
-    "make": "npm run build && electron-forge make",
-    "dev": "vite dev --config vite.renderer.config.ts",
-    "package": "npm run build && electron-forge package",
-    "publish": "electron-forge publish",
-    "lint": "eslint --ext .ts,.tsx ."
-  },
+      "build": "npm run build:node && npm run build:renderer",
+      "build:node": "tsc -p tsconfig.node.json",
+      "build:renderer": "vite build",
+      "dev": "concurrently \"vite dev\" \"electron .\"",
+      "start": "npm run build && electron-forge start",
+      "make": "npm run build && electron-forge make",
+      "package": "npm run build && electron-forge package",
+      "publish": "electron-forge publish",
+      "lint": "eslint --ext .ts,.tsx ."
+    },
   "keywords": [],
   "author": {
     "name": "kerivin",
@@ -35,6 +34,7 @@
     "@types/electron-squirrel-startup": "^1.0.2",
     "@types/node": "^22.17.0",
     "@types/node-fetch": "^2.6.12",
+    "@types/pdfjs-dist": "^2.10.377",
     "@types/react": "^19.1.8",
     "@types/react-dom": "^19.1.6",
     "@types/slate": "^0.47.16",
@@ -53,6 +53,7 @@
     "electron-squirrel-startup": "^1.0.1",
     "flexlayout-react": "^0.8.17",
     "node-fetch": "^3.3.2",
+    "pdfjs-dist": "^5.4.54",
     "react": "^19.1.0",
     "react-dom": "^19.1.0",
     "react-icons": "^5.5.0",
@@ -60,5 +61,8 @@
     "slate-history": "^0.113.1",
     "slate-hyperscript": "^0.100.0",
     "slate-react": "^0.117.4"
+  },
+  "compilerOptions": {
+    "types": ["vite/client", "electron"]
   }
 }
