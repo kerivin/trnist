@@ -22,5 +22,13 @@ export default defineConfig({
       '@assets': path.resolve(__dirname, './src/renderer/assets'),
       'pdfjs-dist': path.resolve(__dirname, './node_modules/pdfjs-dist')
     }
+  },
+  worker: {
+    format: 'es',
+  },
+  optimizeDeps: {
+    esbuildOptions: {
+      tsconfig: './tsconfig.json'
+    }
   }
 });

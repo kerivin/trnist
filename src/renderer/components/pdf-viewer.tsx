@@ -1,166 +1,89 @@
-import React, { useState, useEffect, useRef } from 'react';
-import * as pdfjsLib from 'pdfjs-dist';
+import React, { useEffect, useRef, useState } from 'react';
+import * as pdfjs from 'pdfjs-dist';
+import pdfjsWorker from 'pdfjs-dist/build/pdf.worker.min?url';
 
-pdfjsLib.GlobalWorkerOptions.workerSrc = window.pdfjsWorker.path;
-
-interface PdfViewerOptions
-{
+pdfjs.GlobalWorkerOptions.workerSrc = pdfjsWorker;
+interface PdfViewerOptions {
   url: string;
   scale?: number;
-  onDocumentLoadSuccess?: (numPages: number) => void;
-  onPageLoadSuccess?: (pageNumber: number) => void;
-  className?: string;
 }
 
-const PdfViewer: React.FC<PdfViewerOptions> = ({ url, scale = 1.0, onDocumentLoadSuccess, onPageLoadSuccess, className = '' }) =>
-{
+const PdfViewer: React.FC<PdfViewerOptions> = ({ url, scale = 1.0 }) => {
+  const canvasRef = useRef<HTMLCanvasElement>(null);
   const [numPages, setNumPages] = useState<number | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
   const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
 
-  const canvasRef = useRef<HTMLCanvasElement>(null);
-  const textLayerRef = useRef<HTMLDivElement>(null);
-  const pdfDocRef = useRef<pdfjsLib.PDFDocumentProxy | null>(null);
-
-  useEffect(() =>
-  {
-    const loadPDF = async () =>
-    {
+  useEffect(() => {
+    const loadPDF = async () => {
+      setIsLoading(true);
       try {
-        setIsLoading(true);
-        setError(null);
-
-        const loadingTask = pdfjsLib.getDocument(url);
-        const pdfDoc = await loadingTask.promise;
-        pdfDocRef.current = pdfDoc;
-
-        setNumPages(pdfDoc.numPages);
-        onDocumentLoadSuccess?.(pdfDoc.numPages);
-
-        await renderPage(currentPage, scale);
-      } catch (err) {
-        console.error('PDF loading error:', err);
-        setError('Failed to load PDF document');
+        const pdf = await pdfjs.getDocument(url).promise;
+        setNumPages(pdf.numPages);
+        await renderPage(pdf, currentPage);
+      } catch (error) {
+        console.error('Error loading PDF:', error);
       } finally {
         setIsLoading(false);
       }
     };
 
-    loadPDF();
+    const renderPage = async (pdf: pdfjs.PDFDocumentProxy, pageNum: number) => {
+      const page = await pdf.getPage(pageNum);
+      const viewport = page.getViewport({ scale });
 
-    return () =>
-    {
-      if (pdfDocRef.current) {
-        pdfDocRef.current.destroy();
-      }
-    };
-  }, [url]);
-
-  useEffect(() =>
-  {
-    if (pdfDocRef.current && numPages) {
-      renderPage(currentPage, scale);
-    }
-  }, [currentPage, scale]);
-
-  const renderPage = async (pageNum: number, scaleValue: number) =>
-  {
-    if (!pdfDocRef.current || !canvasRef.current || !textLayerRef.current) return;
-
-    try {
-      setIsLoading(true);
-
-      const page = await pdfDocRef.current.getPage(pageNum);
-      onPageLoadSuccess?.(pageNum);
-
-      const viewport = page.getViewport({ scale: scaleValue });
       const canvas = canvasRef.current;
-      const context = canvas.getContext('2d');
+      if (!canvas) return;
 
-      if (!context) {
-        throw new Error('Could not get canvas context');
-      }
+      const context = canvas.getContext('2d');
+      if (!context) return;
 
       canvas.height = viewport.height;
       canvas.width = viewport.width;
-      textLayerRef.current.innerHTML = '';
 
-      const renderContext = {
+      await page.render({
         canvasContext: context,
-        viewport,
-        canvas
-      };
+        canvas: canvas,
+        viewport: viewport,
+      }).promise;
+    };
 
-      await page.render(renderContext).promise;
+    loadPDF();
+  }, [url, currentPage, scale]);
 
-      const textContent = await page.getTextContent();
-      const textLayer = new pdfjsLib.TextLayer({
-        textContentSource: textContent,
-        container: textLayerRef.current,
-        viewport: viewport
-      })
-      await textLayer.render();
-
-      setIsLoading(false);
-    } catch (err) {
-      console.error('Page rendering error:', err);
-      setError('Failed to render PDF page');
-      setIsLoading(false);
-    }
-  };
-
-  const goToPrevPage = () =>
-  {
+  const goToPrevPage = () => {
     if (currentPage > 1) {
       setCurrentPage(currentPage - 1);
     }
   };
 
-  const goToNextPage = () =>
-  {
+  const goToNextPage = () => {
     if (numPages && currentPage < numPages) {
       setCurrentPage(currentPage + 1);
     }
   };
 
   return (
-    <div className={`pdf-viewer-container ${className}`}>
-      {isLoading && (
-        <div className="pdf-loading-overlay">
-          <div className="pdf-loading-spinner"></div>
-          <p>Loading PDF...</p>
-        </div>
-      )}
-
-      {error && (
-        <div className="pdf-error-message">
-          <p>{error}</p>
-        </div>
-      )}
-
+    <div className="pdf-viewer">
+      
       <div className="pdf-controls">
-        <button
-          onClick={goToPrevPage}
-          disabled={currentPage <= 1 || isLoading}
-        >
-          Previous Page
+        <button onClick={goToPrevPage} disabled={currentPage <= 1}>
+          Previous
         </button>
         <span>
           Page {currentPage} of {numPages || '--'}
         </span>
-        <button
-          onClick={goToNextPage}
-          disabled={!numPages || currentPage >= numPages || isLoading}
+        <button 
+          onClick={goToNextPage} 
+          disabled={!numPages || currentPage >= numPages}
         >
-          Next Page
+          Next
         </button>
       </div>
+      
+      <canvas ref={canvasRef} className="pdf-canvas" />
 
-      <div className="pdf-canvas-container">
-        <canvas ref={canvasRef} className="pdf-canvas" />
-        <div ref={textLayerRef} className="pdf-text-layer" />
-      </div>
+      {isLoading && <div>Loading PDF...</div>}
     </div>
   );
 };

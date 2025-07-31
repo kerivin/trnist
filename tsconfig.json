@@ -2,11 +2,14 @@
   "compilerOptions": {
     "target": "esnext",
     "jsx": "react-jsx",
-    "module": "NodeNext",
-    "moduleResolution": "NodeNext",
+    "module": "esnext",
+    "moduleResolution": "bundler",
     "strict": true,
     "esModuleInterop": true,
-    "skipLibCheck": true,
+    "skipLibCheck": false,
+    "allowSyntheticDefaultImports": true,
+    "preserveSymlinks": true,
+    "types": ["vite/client", "electron"],
     "baseUrl": ".",
     "paths": {
       "@/*": ["src/renderer/*"],

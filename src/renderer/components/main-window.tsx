@@ -2,11 +2,10 @@ import TextEditor from './text-editor';
 import TextViewer from './text-viewer';
 import PdfViewer from './pdf-viewer';
 import MachineTranslation from './machine-translation';
-import { BiChevronsLeft, BiChevronsRight } from 'react-icons/bi';
-import { Action, Layout, Model, TabNode, IJsonModel, IJsonTabNode, TabSetNode, BorderNode, ITabSetRenderValues, Actions, DockLocation, AddIcon } from 'flexlayout-react';
-import 'flexlayout-react/style/combined.css';  
+import 'flexlayout-react/style/combined.css';
+import * as FlexLayout from 'flexlayout-react';
 
-const model_json: IJsonModel = {
+const model_json: FlexLayout.IJsonModel = {
   global: {
     enableEdgeDock: true,
     splitterEnableHandle: false,
@@ -113,11 +112,11 @@ const model_json: IJsonModel = {
   }
 };
 
-const model = Model.fromJson(model_json);
+const model = FlexLayout.Model.fromJson(model_json);
 
 export const MainWindow = () => {
 
-  const factory = (node: TabNode) => {
+  const factory = (node: FlexLayout.TabNode) => {
     const component = node.getComponent();
     switch (component) {
       case "TextEditor":
@@ -131,7 +130,7 @@ export const MainWindow = () => {
           boxSizing: 'border-box', lineHeight: '1.5rem'
         }} />;
       case "PdfViewer":
-        return <div />;
+        return <PdfViewer url={""} scale={ 1 }/>;
       case "MachineTranslation":
         return <MachineTranslation />;
       default:
@@ -139,5 +138,5 @@ export const MainWindow = () => {
     }
   };
 
-  return (<div className='layout_theme'><Layout model={model} factory={factory} realtimeResize={false} /></div>);
+  return (<div className='layout_theme'><FlexLayout.Layout model={model} factory={factory} realtimeResize={false} /></div>);
 };

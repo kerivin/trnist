@@ -5,16 +5,16 @@
   "description": "Book Translationist",
   "main": "dist/main/main.js",
   "scripts": {
-      "build": "npm run build:node && npm run build:renderer",
-      "build:node": "tsc -p tsconfig.node.json",
-      "build:renderer": "vite build",
-      "dev": "concurrently \"vite dev\" \"electron .\"",
-      "start": "npm run build && electron-forge start",
-      "make": "npm run build && electron-forge make",
-      "package": "npm run build && electron-forge package",
-      "publish": "electron-forge publish",
-      "lint": "eslint --ext .ts,.tsx ."
-    },
+    "build": "npm run build:node && npm run build:renderer",
+    "build:node": "tsc -p tsconfig.node.json",
+    "build:renderer": "vite build",
+    "dev": "concurrently \"vite dev\" \"electron .\"",
+    "start": "npm run build && electron-forge start",
+    "make": "npm run build && electron-forge make",
+    "package": "npm run build && electron-forge package",
+    "publish": "electron-forge publish",
+    "lint": "eslint --ext .ts,.tsx ."
+  },
   "keywords": [],
   "author": {
     "name": "kerivin",
@@ -61,8 +61,5 @@
     "slate-history": "^0.113.1",
     "slate-hyperscript": "^0.100.0",
     "slate-react": "^0.117.4"
-  },
-  "compilerOptions": {
-    "types": ["vite/client", "electron"]
   }
 }
