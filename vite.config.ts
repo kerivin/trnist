@@ -36,18 +36,5 @@ export default defineConfig({
       '@assets': path.resolve(__dirname, './src/renderer/assets'),
       'pdfjs-dist': path.resolve(__dirname, './node_modules/pdfjs-dist')
     }
-  },
-  worker: {
-    format: 'es',
-  },
-  optimizeDeps: {
-    include: ['pdfjs-dist'],
-    esbuildOptions: {
-      tsconfig: './tsconfig.json',
-      target: 'esnext',
-      supported: {
-        'top-level-await': true
-      },
-    }
   }
 });

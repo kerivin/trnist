@@ -16,8 +16,6 @@ const createWindow = () => {
       contextIsolation: true,
       plugins: false,
       sandbox: true,
-      webgl: true,
-      webSecurity: false
     },
   });
 

@@ -15,8 +15,7 @@
       "@/*": ["src/renderer/*"],
       "@main/*": ["src/main/*"],
       "@preload/*": ["src/preload/*"],
-      "@assets/*": ["src/renderer/assets/*"],
-      "pdfjs-dist": ["node_modules/pdfjs-dist/types/src/pdf.d.ts"]
+      "@assets/*": ["src/renderer/assets/*"]
     }
   },
   "include": [
