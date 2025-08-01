@@ -23,7 +23,7 @@ const PdfViewer: React.FC<PdfViewerOptions> = ({ url }) => {
   const pdfInstance = useRef<pdfjs.PDFDocumentProxy | null>(null);
   const renderTasks = useRef<{[key: number]: pdfjs.RenderTask | null}>({});
   const containerRef = useRef<HTMLDivElement>(null);
-  const currentCanvasRef = useRef<HTMLCanvasElement | null>(null);
+  const canvasRef = useRef<HTMLCanvasElement | null>(null);
 
   useEffect(() => {
     const updateSize = () => {
@@ -118,15 +118,21 @@ const PdfViewer: React.FC<PdfViewerOptions> = ({ url }) => {
         scale: scale * 2 * window.devicePixelRatio,
         rotation: 0
       });
-
+      
       const cached = imageCache.current.get(pageNum, scaledViewport.width, scaledViewport.height);
-      if (cached) {
-         if (!isPrerender && currentCanvasRef.current) {
-          currentCanvasRef.current.width = scaledViewport.width;
-          currentCanvasRef.current.height = scaledViewport.height;
-          const ctx = currentCanvasRef.current.getContext('2d')!;
-          ctx.drawImage(cached, 0, 0);
+
+      const drawOnCanvas = (image: CanvasImageSource) =>
+      {
+        if (!isPrerender && canvasRef.current) {
+          canvasRef.current.width = scaledViewport.width;
+          canvasRef.current.height = scaledViewport.height;
+          const ctx = canvasRef.current.getContext('2d')!;
+          ctx.drawImage(image, 0, 0);
         }
+      };
+
+      if (cached) {
+        drawOnCanvas(cached);
         return;
       }
 
@@ -147,12 +153,7 @@ const PdfViewer: React.FC<PdfViewerOptions> = ({ url }) => {
       const bitmap = await createImageBitmap(canvas);
       imageCache.current.set(pageNum, bitmap);
 
-      if (!isPrerender && currentCanvasRef.current) {
-        currentCanvasRef.current.width = scaledViewport.width;
-        currentCanvasRef.current.height = scaledViewport.height;
-        const ctx = currentCanvasRef.current.getContext('2d')!;
-        ctx.drawImage(canvas, 0, 0);
-      }
+      drawOnCanvas(canvas);
 
     } catch (error) {
       console.warn(`Error rendering page ${pageNum}:`, error);
@@ -163,7 +164,7 @@ const PdfViewer: React.FC<PdfViewerOptions> = ({ url }) => {
   };
 
   const handleCanvasRef = (canvas: HTMLCanvasElement | null) => {
-    currentCanvasRef.current = canvas;
+    canvasRef.current = canvas;
     if (canvas && pdfInstance.current) {
       renderPage(currentPage);
     }
