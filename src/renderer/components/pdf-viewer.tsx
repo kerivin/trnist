@@ -1,6 +1,9 @@
 import React, { useEffect, useRef, useState } from 'react';
+import { RiArrowLeftLine, RiArrowRightLine } from 'react-icons/ri';
 import * as pdfjs from 'pdfjs-dist';
 import pdfjsWorker from 'pdfjs-dist/build/pdf.worker.min?url';
+import { ImageCache } from '@/utils/image-cache';
+import { CanvasPool } from '@/utils/canvas-pool';
 
 pdfjs.GlobalWorkerOptions.workerSrc = pdfjsWorker;
 
@@ -9,20 +12,42 @@ interface PdfViewerOptions {
   scale?: number;
 }
 
-const PdfViewer: React.FC<PdfViewerOptions> = ({ url, scale = 1.0 }) => {
-  const canvasRef = useRef<HTMLCanvasElement>(null);
+const PdfViewer: React.FC<PdfViewerOptions> = ({ url }) => {
+  const [dimensions, setDimensions] = useState({ width: 0, height: 0 });
   const [numPages, setNumPages] = useState<number | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
   const [isLoading, setIsLoading] = useState(true);
-  const [renderError, setRenderError] = useState<string | null>(null);
+
+  const imageCache = useRef(new ImageCache(20 * 1024 * 1024));
+  const canvasPool = useRef(new CanvasPool());
+  const pdfInstance = useRef<pdfjs.PDFDocumentProxy | null>(null);
+  const renderTasks = useRef<{[key: number]: pdfjs.RenderTask | null}>({});
+  const containerRef = useRef<HTMLDivElement>(null);
+  const currentCanvasRef = useRef<HTMLCanvasElement | null>(null);
 
   useEffect(() => {
-    let pdfInstance: pdfjs.PDFDocumentProxy | null = null;
-    let renderTask: pdfjs.RenderTask | null = null;
+    const updateSize = () => {
+      if (containerRef.current) {
+        setDimensions({
+          width: containerRef.current.clientWidth,
+          height: containerRef.current.clientHeight
+        });
+      }
+    };
 
+    updateSize();
+    const resizeObserver = new ResizeObserver(updateSize);
+    if (containerRef.current) {
+      resizeObserver.observe(containerRef.current);
+    }
+
+    return () => resizeObserver.disconnect();
+  }, []);
+
+  useEffect(() => {
+    let isMounted = true;
     const loadPDF = async () => {
       setIsLoading(true);
-      setRenderError(null);
       try {
         const pdf = await pdfjs.getDocument({
           url,
@@ -34,134 +59,138 @@ const PdfViewer: React.FC<PdfViewerOptions> = ({ url, scale = 1.0 }) => {
           useSystemFonts: true,
         }).promise;
         
-        pdfInstance = pdf;
+        if (!isMounted) return;
+        
+        pdfInstance.current = pdf;
         setNumPages(pdf.numPages);
-        await renderPage(pdf, currentPage);
+        await renderCurrentPage();
       } catch (error) {
         console.error('Error loading PDF:', error);
-        setRenderError('Failed to load PDF');
       } finally {
-        setIsLoading(false);
-      }
-    };
-
-    const renderPage = async (pdf: pdfjs.PDFDocumentProxy, pageNum: number) => {
-      try {
-        const page = await pdf.getPage(pageNum);
-        const viewport = page.getViewport({ 
-          scale: scale * window.devicePixelRatio
-        });
-
-        const canvas = canvasRef.current;
-        if (!canvas) return;
-
-        const context = canvas.getContext('2d');
-        if (!context) return;
-
-        canvas.height = Math.floor(viewport.height);
-        canvas.width = Math.floor(viewport.width);
-        canvas.style.height = `${viewport.height / window.devicePixelRatio}px`;
-        canvas.style.width = `${viewport.width / window.devicePixelRatio}px`;
-
-        try {
-          renderTask = page.render({
-            canvasContext: context,
-            canvas,
-            viewport,
-            intent: 'display',
-            annotationMode: pdfjs.AnnotationMode.ENABLE,
-          });
-          await renderTask.promise;
-        } catch (renderError) {
-          console.warn('Primary render failed, attempting fallback:', renderError);
-          context.clearRect(0, 0, canvas.width, canvas.height);
-          renderTask = page.render({
-            canvasContext: context,
-            canvas,
-            viewport,
-            intent: 'display',
-            annotationMode: pdfjs.AnnotationMode.ENABLE,
-          });
-          await renderTask.promise;
-          setRenderError('Some images could not be displayed');
-        }
-      } catch (error) {
-        console.error('Error rendering page:', error);
-        setRenderError('Failed to render page');
+        if (isMounted) setIsLoading(false);
       }
     };
 
     loadPDF();
 
     return () => {
-      if (renderTask) {
-        renderTask.cancel();
-      }
-      if (pdfInstance) {
-        pdfInstance.destroy();
-      }
+      isMounted = false;
+      renderTasks.current[currentPage]?.cancel();
+      pdfInstance.current?.destroy();
     };
-  }, [url, currentPage, scale]);
+  }, [url]);
+
+  useEffect(() => {
+    if (!pdfInstance.current) return;
+    renderCurrentPage();
+  }, [currentPage, dimensions]);
+
+  const renderCurrentPage = async () => {
+    if (!pdfInstance.current || dimensions.width <= 0 || dimensions.height <= 0) return;
+
+    renderTasks.current[currentPage]?.cancel();
+
+    try {
+      const page = await pdfInstance.current.getPage(currentPage);
+      const viewport = page.getViewport({ scale: 1 });
+      
+      const scale = Math.min(
+        dimensions.width / viewport.width, 
+        dimensions.height / viewport.height
+      ) * 0.95;
+
+      const scaledViewport = page.getViewport({ 
+        scale: scale * 2 * window.devicePixelRatio,
+        rotation: 0
+      });
+
+      const canvas = currentCanvasRef.current || canvasPool.current.get();
+      currentCanvasRef.current = canvas;
+
+      canvas.width = scaledViewport.width;
+      canvas.height = scaledViewport.height;
+
+      console.log("[PDF] Page sizes: %dx%d", canvas.width, canvas.height);
+      const cached = imageCache.current.get(currentPage, canvas.width, canvas.height);
+      if (cached) {
+        const ctx = canvas.getContext('2d')!;
+        ctx.drawImage(cached, 0, 0);
+        return;
+      }
+
+      renderTasks.current[currentPage] = page.render({
+        canvasContext: canvas.getContext('2d')!,
+        canvas,
+        viewport: scaledViewport,
+        intent: 'display',
+        annotationMode: pdfjs.AnnotationMode.ENABLE,
+      });
+
+      await renderTasks.current[currentPage]?.promise;
+      const bitmap = await createImageBitmap(canvas);
+      imageCache.current.set(currentPage, bitmap);
+
+    } catch (error) {
+      console.warn(`Error rendering page ${currentPage}:`, error);
+    }
+  };
+
+  const handleCanvasRef = (canvas: HTMLCanvasElement | null) => {
+    if (!canvas) {
+      if (currentCanvasRef.current) {
+        canvasPool.current.return(currentCanvasRef.current);
+      }
+      currentCanvasRef.current = null;
+      return;
+    }
+    
+    currentCanvasRef.current = canvas;
+    if (pdfInstance.current) {
+      renderCurrentPage();
+    }
+  };
 
   const goToPrevPage = () => currentPage > 1 && setCurrentPage(currentPage - 1);
   const goToNextPage = () => numPages && currentPage < numPages && setCurrentPage(currentPage + 1);
 
   return (
-    <div className="pdf-viewer">
-      <div className="pdf-controls">
-        <button onClick={goToPrevPage} disabled={currentPage <= 1}>
-          Previous
+    <div 
+      ref={containerRef} 
+      style={{
+        width: '100%',
+        height: '100%',
+        display: 'flex',
+        flexDirection: 'column',
+        justifyContent: 'flex-start',
+        alignItems: 'center',
+        overflow: 'hidden'
+      }}
+    >
+      <div className="pdf-controls" style={{ display: 'flex', alignItems: 'center' }}>
+        <button onClick={goToPrevPage} style={{ background: 'transparent', border: '0', cursor: 'pointer' }} disabled={currentPage <= 1}>
+          <RiArrowLeftLine size={20}/>
         </button>
         <span>
-          Page {currentPage} of {numPages || '--'}
+          {currentPage}/{numPages || '--'}
         </span>
-        <button 
-          onClick={goToNextPage} 
-          disabled={!numPages || currentPage >= numPages}
-        >
-          Next
+        <button onClick={goToNextPage} style={{ background: 'transparent', border: '0', cursor: 'pointer' }} disabled={!numPages || currentPage >= numPages}>
+          <RiArrowRightLine size={20} />
         </button>
       </div>
       
-      <div className="pdf-container" style={{ position: 'relative' }}>
+      <div className="pdf-container" style={{ position: 'relative', height: '100%', width: '100%' }}>
         <canvas 
-          ref={canvasRef} 
+          ref={handleCanvasRef}
           className="pdf-canvas" 
           style={{ 
             display: 'block',
             backgroundColor: '#f5f5f5',
-            border: '1px solid #ddd'
+            border: '1px solid #ddd',
+            maxWidth: '100%',
+            maxHeight: '100%',
+            margin: '0 auto'
           }} 
         />
-        {isLoading && (
-          <div style={{
-            position: 'absolute',
-            top: '50%',
-            left: '50%',
-            transform: 'translate(-50%, -50%)',
-            padding: '10px',
-            background: 'rgba(0,0,0,0.7)',
-            color: 'white',
-            borderRadius: '4px'
-          }}>
-            Loading PDF...
-          </div>
-        )}
-        {renderError && !isLoading && (
-          <div style={{
-            position: 'absolute',
-            bottom: '10px',
-            left: '50%',
-            transform: 'translateX(-50%)',
-            padding: '5px 10px',
-            background: 'rgba(255,0,0,0.7)',
-            color: 'white',
-            borderRadius: '4px',
-            fontSize: '0.9em'
-          }}>
-            {renderError}
-          </div>
-        )}
       </div>
     </div>
   );

@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { createEditor, Descendant, Editor } from 'slate';
 import { withReact, Slate, Editable } from 'slate-react';
 import { withHistory } from 'slate-history';
-import './slate-types';
+import '../utils/slate-types';
 
 const initialValue: Descendant[] = [
   {

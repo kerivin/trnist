@@ -130,7 +130,7 @@ export const MainWindow = () => {
           boxSizing: 'border-box', lineHeight: '1.5rem'
         }} />;
       case "PdfViewer":
-        return <PdfViewer url={""} scale={ 1 }/>;
+        return <PdfViewer url={""} />;
       case "MachineTranslation":
         return <MachineTranslation />;
       default:
