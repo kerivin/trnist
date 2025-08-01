@@ -200,3 +200,15 @@ body {
 .layout_theme .flexlayout__tab_toolbar_button {
   cursor: pointer;
 }
+
+.pdf-text span {
+  position: absolute;
+  transform-origin: 0 0;
+  white-space: pre;
+  color: transparent !important;
+}
+
+.pdf-text span::selection {
+  background: rgba(255, 68, 0, 0.3) !important;
+  color: transparent !important;
+}

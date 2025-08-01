@@ -24,6 +24,7 @@ const PdfViewer: React.FC<PdfViewerOptions> = ({ url }) => {
   const renderTasks = useRef<{[key: number]: pdfjs.RenderTask | null}>({});
   const containerRef = useRef<HTMLDivElement>(null);
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
+  const textLayerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const updateSize = () => {
@@ -116,7 +117,6 @@ const PdfViewer: React.FC<PdfViewerOptions> = ({ url }) => {
       });
       
       console.log("[PDF] size: %dx%d", scaledViewport.width, scaledViewport.height);
-      const cached = imageCache.current.get(pageNum, scaledViewport.width, scaledViewport.height);
 
       const drawOnCanvas = (image: CanvasImageSource) =>
       {
@@ -128,6 +128,7 @@ const PdfViewer: React.FC<PdfViewerOptions> = ({ url }) => {
         }
       };
 
+      const cached = imageCache.current.get(pageNum, scaledViewport.width, scaledViewport.height);
       if (cached) {
         drawOnCanvas(cached);
         return;
@@ -146,11 +147,28 @@ const PdfViewer: React.FC<PdfViewerOptions> = ({ url }) => {
       });
 
       await renderTasks.current[pageNum]?.promise;
+      drawOnCanvas(canvas);
 
       const bitmap = await createImageBitmap(canvas);
       imageCache.current.set(pageNum, bitmap);
 
-      drawOnCanvas(canvas);
+      if (!isPrerender) {
+        const textLayer = textLayerRef.current;
+        if (!textLayer) return;
+
+        textLayer.innerHTML = '';
+
+        const textScale = dimensions.width / viewport.width;
+        textLayer.style.setProperty('--total-scale-factor', `${textScale}`);
+        console.log("[PDF] Text scale: %f", textScale);
+
+        const text = new pdfjs.TextLayer({
+          textContentSource: await page.getTextContent(),
+          container: textLayer,
+          viewport: scaledViewport,
+        });
+        text.render();
+      }
 
     } catch (error) {
       console.warn(`Error rendering page ${pageNum}:`, error);
@@ -175,8 +193,6 @@ const PdfViewer: React.FC<PdfViewerOptions> = ({ url }) => {
     <div 
       ref={containerRef} 
       style={{
-        width: '100%',
-        height: '100%',
         display: 'flex',
         flexDirection: 'column',
         justifyContent: 'flex-start',
@@ -196,18 +212,17 @@ const PdfViewer: React.FC<PdfViewerOptions> = ({ url }) => {
         </button>
       </div>
       
-      <div className="pdf-container" style={{ position: 'relative', height: '100%', width: '100%', overflow: 'auto' }}>
-        <canvas 
+      <div className="pdf-container" style={{ position: 'relative', overflow: 'auto' }}>
+        <canvas
           ref={handleCanvasRef}
-          className="pdf-canvas" 
-          style={{ 
-            display: 'block',
-            backgroundColor: 'transparent',
-            maxWidth: '100%',
-            // maxHeight: '100%',
-            margin: '0 auto'
-          }} 
-        />
+          className="pdf-canvas"
+          style={{ display: 'block', backgroundColor: 'transparent', maxWidth: '100%', margin: '0 auto' }}>
+        </canvas>
+        <div ref={textLayerRef} className="pdf-text" style={{
+          color: 'transparent',
+          cursor: 'text',
+          lineHeight: '0',
+        }} />
       </div>
     </div>
   );
