@@ -64,6 +64,7 @@ const PdfViewer: React.FC<PdfViewerOptions> = ({ url }) => {
         pdfInstance.current = pdf;
         setNumPages(pdf.numPages);
         await renderPage(currentPage);
+        prerenderPages(currentPage);
       } catch (error) {
         console.error('Error loading PDF:', error);
       } finally {
@@ -119,6 +120,7 @@ const PdfViewer: React.FC<PdfViewerOptions> = ({ url }) => {
         rotation: 0
       });
       
+      console.log("[PDF] size: %dx%d", scaledViewport.width, scaledViewport.height);
       const cached = imageCache.current.get(pageNum, scaledViewport.width, scaledViewport.height);
 
       const drawOnCanvas = (image: CanvasImageSource) =>
@@ -167,6 +169,7 @@ const PdfViewer: React.FC<PdfViewerOptions> = ({ url }) => {
     canvasRef.current = canvas;
     if (canvas && pdfInstance.current) {
       renderPage(currentPage);
+      prerenderPages(currentPage);
     }
   };
 
@@ -198,16 +201,15 @@ const PdfViewer: React.FC<PdfViewerOptions> = ({ url }) => {
         </button>
       </div>
       
-      <div className="pdf-container" style={{ position: 'relative', height: '100%', width: '100%' }}>
+      <div className="pdf-container" style={{ position: 'relative', height: '100%', width: '100%', overflow: 'auto' }}>
         <canvas 
           ref={handleCanvasRef}
           className="pdf-canvas" 
           style={{ 
             display: 'block',
-            backgroundColor: '#f5f5f5',
-            border: '1px solid #ddd',
+            backgroundColor: 'transparent',
             maxWidth: '100%',
-            maxHeight: '100%',
+            // maxHeight: '100%',
             margin: '0 auto'
           }} 
         />
