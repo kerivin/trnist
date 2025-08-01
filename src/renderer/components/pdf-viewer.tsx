@@ -63,7 +63,7 @@ const PdfViewer: React.FC<PdfViewerOptions> = ({ url }) => {
         
         pdfInstance.current = pdf;
         setNumPages(pdf.numPages);
-        await renderCurrentPage();
+        await renderPage(currentPage);
       } catch (error) {
         console.error('Error loading PDF:', error);
       } finally {
@@ -82,16 +82,31 @@ const PdfViewer: React.FC<PdfViewerOptions> = ({ url }) => {
 
   useEffect(() => {
     if (!pdfInstance.current) return;
-    renderCurrentPage();
+    renderPage(currentPage);
+    prerenderPages(currentPage);
   }, [currentPage, dimensions]);
 
-  const renderCurrentPage = async () => {
+  const prerenderPages = async (pageNum: number) => {
+    if (!numPages) return;
+
+    const pagesToRender = [
+      pageNum - 2,
+      pageNum - 1,
+      pageNum + 1,
+      pageNum + 2
+    ].filter(page => page >= 1 && page <= numPages);
+
+    await Promise.all(pagesToRender.map(page => renderPage(page, true)));
+  };
+
+  const renderPage = async (pageNum: number, isPrerender = false) => {
     if (!pdfInstance.current || dimensions.width <= 0 || dimensions.height <= 0) return;
 
-    renderTasks.current[currentPage]?.cancel();
+    renderTasks.current[pageNum]?.cancel();
+    let canvas: HTMLCanvasElement | null = null;
 
     try {
-      const page = await pdfInstance.current.getPage(currentPage);
+      const page = await pdfInstance.current.getPage(pageNum);
       const viewport = page.getViewport({ scale: 1 });
       
       const scale = Math.min(
@@ -104,21 +119,22 @@ const PdfViewer: React.FC<PdfViewerOptions> = ({ url }) => {
         rotation: 0
       });
 
-      const canvas = currentCanvasRef.current || canvasPool.current.get();
-      currentCanvasRef.current = canvas;
-
-      canvas.width = scaledViewport.width;
-      canvas.height = scaledViewport.height;
-
-      console.log("[PDF] Page sizes: %dx%d", canvas.width, canvas.height);
-      const cached = imageCache.current.get(currentPage, canvas.width, canvas.height);
+      const cached = imageCache.current.get(pageNum, scaledViewport.width, scaledViewport.height);
       if (cached) {
-        const ctx = canvas.getContext('2d')!;
-        ctx.drawImage(cached, 0, 0);
+         if (!isPrerender && currentCanvasRef.current) {
+          currentCanvasRef.current.width = scaledViewport.width;
+          currentCanvasRef.current.height = scaledViewport.height;
+          const ctx = currentCanvasRef.current.getContext('2d')!;
+          ctx.drawImage(cached, 0, 0);
+        }
         return;
       }
 
-      renderTasks.current[currentPage] = page.render({
+      const canvas = canvasPool.current.get();
+      canvas.width = scaledViewport.width;
+      canvas.height = scaledViewport.height;
+
+      renderTasks.current[pageNum] = page.render({
         canvasContext: canvas.getContext('2d')!,
         canvas,
         viewport: scaledViewport,
@@ -126,27 +142,30 @@ const PdfViewer: React.FC<PdfViewerOptions> = ({ url }) => {
         annotationMode: pdfjs.AnnotationMode.ENABLE,
       });
 
-      await renderTasks.current[currentPage]?.promise;
+      await renderTasks.current[pageNum]?.promise;
+
       const bitmap = await createImageBitmap(canvas);
-      imageCache.current.set(currentPage, bitmap);
+      imageCache.current.set(pageNum, bitmap);
+
+      if (!isPrerender && currentCanvasRef.current) {
+        currentCanvasRef.current.width = scaledViewport.width;
+        currentCanvasRef.current.height = scaledViewport.height;
+        const ctx = currentCanvasRef.current.getContext('2d')!;
+        ctx.drawImage(canvas, 0, 0);
+      }
 
     } catch (error) {
-      console.warn(`Error rendering page ${currentPage}:`, error);
+      console.warn(`Error rendering page ${pageNum}:`, error);
+    } finally {
+      if (canvas) canvasPool.current.return(canvas);
+      delete renderTasks.current[pageNum];
     }
   };
 
   const handleCanvasRef = (canvas: HTMLCanvasElement | null) => {
-    if (!canvas) {
-      if (currentCanvasRef.current) {
-        canvasPool.current.return(currentCanvasRef.current);
-      }
-      currentCanvasRef.current = null;
-      return;
-    }
-    
     currentCanvasRef.current = canvas;
-    if (pdfInstance.current) {
-      renderCurrentPage();
+    if (canvas && pdfInstance.current) {
+      renderPage(currentPage);
     }
   };
 
