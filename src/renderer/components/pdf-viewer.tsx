@@ -1,9 +1,8 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState, useCallback } from 'react';
 import { RiArrowLeftLine, RiArrowRightLine } from 'react-icons/ri';
 import * as pdfjs from 'pdfjs-dist';
 import pdfjsWorker from 'pdfjs-dist/build/pdf.worker.min?url';
-import { ImageCache } from '@/utils/image-cache';
-import { CanvasPool } from '@/utils/canvas-pool';
+import { CanvasCache } from '@/utils/canvas-cache';
 
 pdfjs.GlobalWorkerOptions.workerSrc = pdfjsWorker;
 
@@ -12,19 +11,26 @@ interface PdfViewerOptions {
   scale?: number;
 }
 
+const PAGE_BUFFER: number = 2;
+const CACHE_SIZE_MB: number = 30;
+
 const PdfViewer: React.FC<PdfViewerOptions> = ({ url }) => {
   const [dimensions, setDimensions] = useState({ width: 0, height: 0 });
   const [numPages, setNumPages] = useState<number | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
   const [isLoading, setIsLoading] = useState(true);
+  const [pageHeights, setPageHeights] = useState<number[]>([]);
+  const [totalHeight, setTotalHeight] = useState(0);
+  const [visiblePages, setVisiblePages] = useState<number[]>([1]);
 
-  const imageCache = useRef(new ImageCache(20 * 1024 * 1024));
-  const canvasPool = useRef(new CanvasPool());
+  const canvasCache = useRef(new CanvasCache(CACHE_SIZE_MB * 1024 * 1024));
   const pdfInstance = useRef<pdfjs.PDFDocumentProxy | null>(null);
   const renderTasks = useRef<{[key: number]: pdfjs.RenderTask | null}>({});
   const containerRef = useRef<HTMLDivElement>(null);
-  const canvasRef = useRef<HTMLCanvasElement | null>(null);
-  const textLayerRef = useRef<HTMLDivElement>(null);
+  const contentRef = useRef<HTMLDivElement>(null);
+  const pageContainerRef = useRef<HTMLDivElement>(null);
+  const visiblePagesRef = useRef<Set<number>>(new Set([1]));
+  const pendingRenderRequests = useRef<Set<number>>(new Set());
 
   useEffect(() => {
     const updateSize = () => {
@@ -33,6 +39,7 @@ const PdfViewer: React.FC<PdfViewerOptions> = ({ url }) => {
           width: containerRef.current.clientWidth,
           height: containerRef.current.clientHeight
         });
+        updateVisiblePages();
       }
     };
 
@@ -43,7 +50,64 @@ const PdfViewer: React.FC<PdfViewerOptions> = ({ url }) => {
     }
 
     return () => resizeObserver.disconnect();
-  }, []);
+  }, [isLoading]);
+
+  const updateVisiblePages = useCallback(() => {
+    if (!contentRef.current || !numPages) return;
+    
+    const { scrollTop, clientHeight } = contentRef.current;
+    const startY = scrollTop - (PAGE_BUFFER * clientHeight);
+    const endY = scrollTop + clientHeight * (1 + PAGE_BUFFER);
+    
+    const newVisiblePages = new Set<number>();
+    let accumulatedHeight = 0;
+    
+    for (let i = 0; i < pageHeights.length; i++) {
+      const pageEnd = accumulatedHeight + pageHeights[i];
+      if (pageEnd > startY && accumulatedHeight < endY) {
+        newVisiblePages.add(i + 1);
+      }
+      accumulatedHeight = pageEnd;
+    }
+
+    visiblePagesRef.current = newVisiblePages;
+    setVisiblePages(Array.from(newVisiblePages));
+
+    console.log("[PDF] visible pages: ", newVisiblePages);
+  }, [numPages, pageHeights]);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      if (!contentRef.current || !numPages) return;
+
+      const scrollTop = contentRef.current!.scrollTop;
+      let accumulatedHeight = 0;
+      let newCurrentPage = 1;
+      for (let i = 0; i < pageHeights.length; i++) {
+        accumulatedHeight += pageHeights[i];
+        if (scrollTop < accumulatedHeight) {
+          newCurrentPage = i + 1;
+          break;
+        }
+      }
+
+      if (newCurrentPage !== currentPage) {
+        setCurrentPage(newCurrentPage);
+      }
+
+      updateVisiblePages();
+    };
+
+    if (contentRef.current) {
+      contentRef.current.addEventListener('scroll', handleScroll, { passive: true });
+    }
+
+    return () => {
+      if (contentRef.current) {
+        contentRef.current.removeEventListener('scroll', handleScroll);
+      }
+    };
+  }, [currentPage, numPages, pageHeights]);
 
   useEffect(() => {
     let isMounted = true;
@@ -63,9 +127,26 @@ const PdfViewer: React.FC<PdfViewerOptions> = ({ url }) => {
         if (!isMounted) return;
         
         pdfInstance.current = pdf;
+
+        if (pageContainerRef.current) {
+          pageContainerRef.current.innerHTML = '';
+          const fragment = document.createDocumentFragment();
+          
+          for (let i = 1; i <= pdf.numPages; i++) {
+            const pageDiv = document.createElement('div');
+            pageDiv.className = 'pdf-page-container';
+            pageDiv.dataset.pageNumber = i.toString();
+            pageDiv.style.position = 'absolute';
+            pageDiv.style.width = '100%';
+            pageDiv.style.left = '0';
+            fragment.appendChild(pageDiv);
+          }
+          
+          pageContainerRef.current.appendChild(fragment);
+        }
+
         setNumPages(pdf.numPages);
-        await renderPage(currentPage);
-        prerenderPages(currentPage);
+        await calculatePageHeights(pdf);
       } catch (error) {
         console.error('Error loading PDF:', error);
       } finally {
@@ -77,64 +158,92 @@ const PdfViewer: React.FC<PdfViewerOptions> = ({ url }) => {
 
     return () => {
       isMounted = false;
-      renderTasks.current[currentPage]?.cancel();
+      cancelAllRenderTasks();
       pdfInstance.current?.destroy();
     };
   }, [url]);
 
   useEffect(() => {
-    if (!pdfInstance.current) return;
-    renderPage(currentPage);
-    prerenderPages(currentPage);
-  }, [currentPage, dimensions]);
+    if (!pdfInstance.current || dimensions.width <= 0) return;
+    calculatePageHeights(pdfInstance.current);
+  }, [dimensions, numPages]);
 
-  const prerenderPages = async (pageNum: number) => {
-    if (!numPages) return;
+  useEffect(() => {
+    if (!pdfInstance.current || dimensions.width <= 0) return;
 
-    const pagesToRender = [
-      pageNum - 2,
-      pageNum - 1,
-      pageNum + 1,
-      pageNum + 2
-    ].filter(page => page >= 1 && page <= numPages);
+    pendingRenderRequests.current.forEach(pageNum => {
+      if (!visiblePagesRef.current.has(pageNum)) {
+        renderTasks.current[pageNum]?.cancel();
+        pendingRenderRequests.current.delete(pageNum);
+      }
+    });
 
-    await Promise.all(pagesToRender.map(page => renderPage(page, true)));
+    visiblePagesRef.current.forEach(pageNum => {
+      if (!pendingRenderRequests.current.has(pageNum)) {
+        pendingRenderRequests.current.add(pageNum);
+        renderPage(pageNum).finally(() => {
+          pendingRenderRequests.current.delete(pageNum);
+        });
+      }
+    });
+  }, [visiblePages, dimensions]);
+
+  const calculatePageHeights = async (pdf: pdfjs.PDFDocumentProxy) => {
+    const heights = [];
+    let total = 0;
+    
+    for (let i = 1; i <= pdf.numPages; i++) {
+      const page = await pdf.getPage(i);
+      const viewport = page.getViewport({ scale: 1 });
+      const scaledHeight = dimensions.width / viewport.width * viewport.height;
+      heights.push(scaledHeight);
+      total += scaledHeight;
+    }
+    
+    setPageHeights(heights);
+    setTotalHeight(total);
+    
+    if (pageContainerRef.current) {
+      let accumulatedHeight = 0;
+      const pageContainers = pageContainerRef.current.children;
+      
+      for (let i = 0; i < pageContainers.length; i++) {
+        const pageContainer = pageContainers[i] as HTMLElement;
+        pageContainer.style.top = `${accumulatedHeight}px`;
+        pageContainer.style.height = `${heights[i]}px`;
+        accumulatedHeight += heights[i];
+      }
+    }
   };
 
-  const renderPage = async (pageNum: number, isPrerender = false) => {
+  const cancelAllRenderTasks = () => {
+    Object.values(renderTasks.current).forEach(task => task?.cancel());
+    renderTasks.current = {};
+    pendingRenderRequests.current.clear();
+  };
+
+  const renderPage = async (pageNum: number) => {
     if (!pdfInstance.current || dimensions.width <= 0 || dimensions.height <= 0) return;
+    if (!visiblePagesRef.current.has(pageNum)) return;
 
     renderTasks.current[pageNum]?.cancel();
-    let canvas: HTMLCanvasElement | null = null;
 
     try {
       const page = await pdfInstance.current.getPage(pageNum);
       const viewport = page.getViewport({ scale: 1 });
+      const scale = dimensions.width / viewport.width;
+      const scaledViewport = page.getViewport({ scale: 2 * scale, rotation: 0 });
 
-      const scaledViewport = page.getViewport({ 
-        scale: dimensions.width / viewport.width * 2 * window.devicePixelRatio,
-        rotation: 0
-      });
-      
-      console.log("[PDF] size: %dx%d", scaledViewport.width, scaledViewport.height);
+      const pageContainer = pageContainerRef.current?.querySelector(`[data-page-number="${pageNum}"]`) as HTMLElement;
+      if (!pageContainer) return;
 
-      const drawOnCanvas = (image: CanvasImageSource) =>
-      {
-        if (!isPrerender && canvasRef.current) {
-          canvasRef.current.width = scaledViewport.width;
-          canvasRef.current.height = scaledViewport.height;
-          const ctx = canvasRef.current.getContext('2d')!;
-          ctx.drawImage(image, 0, 0);
-        }
-      };
-
-      const cached = imageCache.current.get(pageNum, scaledViewport.width, scaledViewport.height);
+      const cached = canvasCache.current.get(pageNum, scaledViewport.width, scaledViewport.height);
       if (cached) {
-        drawOnCanvas(cached);
+        updatePageContainer(pageContainer, cached, scaledViewport, scale, page);
         return;
       }
 
-      const canvas = canvasPool.current.get();
+      const canvas = document.createElement('canvas');
       canvas.width = scaledViewport.width;
       canvas.height = scaledViewport.height;
 
@@ -147,47 +256,89 @@ const PdfViewer: React.FC<PdfViewerOptions> = ({ url }) => {
       });
 
       await renderTasks.current[pageNum]?.promise;
-      drawOnCanvas(canvas);
-
+      
       const bitmap = await createImageBitmap(canvas);
-      imageCache.current.set(pageNum, bitmap);
-
-      if (!isPrerender) {
-        const textLayer = textLayerRef.current;
-        if (!textLayer) return;
-
-        textLayer.innerHTML = '';
-
-        const textScale = dimensions.width / viewport.width;
-        textLayer.style.setProperty('--total-scale-factor', `${textScale}`);
-        console.log("[PDF] Text scale: %f", textScale);
-
-        const text = new pdfjs.TextLayer({
-          textContentSource: await page.getTextContent(),
-          container: textLayer,
-          viewport: scaledViewport,
-        });
-        text.render();
-      }
-
+      canvasCache.current.set(pageNum, canvas);
+      
+      updatePageContainer(pageContainer, bitmap, scaledViewport, scale, page);
     } catch (error) {
+      if (error instanceof Error && error.message.includes('Rendering cancelled')) {
+        return;
+      }
       console.warn(`Error rendering page ${pageNum}:`, error);
     } finally {
-      if (canvas) canvasPool.current.return(canvas);
       delete renderTasks.current[pageNum];
     }
   };
 
-  const handleCanvasRef = (canvas: HTMLCanvasElement | null) => {
-    canvasRef.current = canvas;
-    if (canvas && pdfInstance.current) {
-      renderPage(currentPage);
-      prerenderPages(currentPage);
+  const updatePageContainer = (
+    container: HTMLElement,
+    image: CanvasImageSource,
+    viewport: pdfjs.PageViewport,
+    scale: number,
+    page: pdfjs.PDFPageProxy
+  ) => {
+    container.innerHTML = '';
+
+    const canvas = document.createElement('canvas');
+    canvas.width = viewport.width;
+    canvas.height = viewport.height;
+    canvas.style.width = '100%';
+    canvas.style.height = '100%';
+    canvas.style.display = 'block';
+    canvas.style.overflow = 'hidden';
+
+    const ctx = canvas.getContext('2d')!;
+    ctx.drawImage(image, 0, 0);
+
+    const textLayer = document.createElement('div');
+    textLayer.className = 'pdf-text';
+    textLayer.style.color = 'transparent';
+    textLayer.style.cursor = 'text';
+    textLayer.style.lineHeight = '0';
+    textLayer.style.setProperty('--total-scale-factor', `${scale}`);
+
+    container.appendChild(canvas);
+    container.appendChild(textLayer);
+
+    page.getTextContent().then(textContent => {
+      if (!container.contains(textLayer)) return;
+
+      const text = new pdfjs.TextLayer({
+        textContentSource: textContent,
+        container: textLayer,
+        viewport,
+      });
+      text.render();
+    });
+  };
+
+  const goToPrevPage = () => {
+    if (currentPage > 1) {
+      scrollToPage(currentPage - 1);
     }
   };
 
-  const goToPrevPage = () => currentPage > 1 && setCurrentPage(currentPage - 1);
-  const goToNextPage = () => numPages && currentPage < numPages && setCurrentPage(currentPage + 1);
+  const goToNextPage = () => {
+    if (numPages && currentPage < numPages) {
+      scrollToPage(currentPage + 1);
+    }
+  };
+
+  const scrollToPage = (pageNum: number) => {
+    if (contentRef.current && pageNum >= 1 && pageNum <= (numPages || 0)) {
+      let offset = 0;
+      for (let i = 0; i < pageNum - 1; i++) {
+        offset += pageHeights[i] || 0;
+      }
+      contentRef.current.scrollTo({
+        top: offset,
+        behavior: 'smooth'
+      });
+      setCurrentPage(pageNum);
+      updateVisiblePages();
+    }
+  };
 
   return (
     <div 
@@ -197,32 +348,53 @@ const PdfViewer: React.FC<PdfViewerOptions> = ({ url }) => {
         flexDirection: 'column',
         justifyContent: 'flex-start',
         alignItems: 'center',
-        overflow: 'hidden'
+        overflow: 'hidden',
+        height: '100%'
       }}
     >
-      <div className="pdf-controls" style={{ display: 'flex', alignItems: 'center' }}>
-        <button onClick={goToPrevPage} style={{ background: 'transparent', border: '0', cursor: 'pointer' }} disabled={currentPage <= 1}>
+      <div className="pdf-controls" style={{ 
+        display: 'flex', 
+        alignItems: 'center',
+        padding: '8px'
+      }}>
+        <button 
+          onClick={goToPrevPage} 
+          style={{ background: 'transparent', border: '0', cursor: 'pointer' }} 
+          disabled={currentPage <= 1}
+        >
           <RiArrowLeftLine size={20}/>
         </button>
-        <span>
+        <span style={{ margin: '0 8px' }}>
           {currentPage}/{numPages || '--'}
         </span>
-        <button onClick={goToNextPage} style={{ background: 'transparent', border: '0', cursor: 'pointer' }} disabled={!numPages || currentPage >= numPages}>
+        <button 
+          onClick={goToNextPage} 
+          style={{ background: 'transparent', border: '0', cursor: 'pointer' }} 
+          disabled={!numPages || currentPage >= numPages}
+        >
           <RiArrowRightLine size={20} />
         </button>
       </div>
       
-      <div className="pdf-container" style={{ position: 'relative', overflow: 'auto' }}>
-        <canvas
-          ref={handleCanvasRef}
-          className="pdf-canvas"
-          style={{ display: 'block', backgroundColor: 'transparent', maxWidth: '100%', margin: '0 auto' }}>
-        </canvas>
-        <div ref={textLayerRef} className="pdf-text" style={{
-          color: 'transparent',
-          cursor: 'text',
-          lineHeight: '0',
-        }} />
+      <div 
+        ref={contentRef} 
+        className="pdf-container" 
+        style={{ 
+          position: 'relative', 
+          overflowY: 'auto',
+          overflowX: 'clip',
+          width: '100%',
+          flex: 1
+        }}
+      >
+        <div 
+          ref={pageContainerRef}
+          style={{ 
+            position: 'relative', 
+            height: totalHeight,
+            width: '100%'
+          }}
+        />
       </div>
     </div>
   );
