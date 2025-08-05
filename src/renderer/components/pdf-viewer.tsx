@@ -11,7 +11,7 @@ interface PdfViewerOptions {
   scale?: number;
 }
 
-const PAGE_BUFFER: number = 2;
+const PAGE_BUFFER: number = 4;
 const CACHE_SIZE_MB: number = 30;
 
 const PdfViewer: React.FC<PdfViewerOptions> = ({ url }) => {
@@ -39,7 +39,6 @@ const PdfViewer: React.FC<PdfViewerOptions> = ({ url }) => {
           width: containerRef.current.clientWidth,
           height: containerRef.current.clientHeight
         });
-        updateVisiblePages();
       }
     };
 
@@ -76,26 +75,30 @@ const PdfViewer: React.FC<PdfViewerOptions> = ({ url }) => {
     console.log("[PDF] visible pages: ", newVisiblePages);
   }, [numPages, pageHeights]);
 
+  const updateLayout = () => {
+    if (!contentRef.current || !numPages) return;
+
+    const scrollTop = contentRef.current!.scrollTop;
+    let accumulatedHeight = 0;
+    let newCurrentPage = 1;
+    for (let i = 0; i < pageHeights.length; i++) {
+      accumulatedHeight += pageHeights[i];
+      if (scrollTop < accumulatedHeight) {
+        newCurrentPage = i + 1;
+        break;
+      }
+    }
+
+    if (newCurrentPage !== currentPage) {
+      setCurrentPage(newCurrentPage);
+    }
+
+    updateVisiblePages();
+  };
+
   useEffect(() => {
     const handleScroll = () => {
-      if (!contentRef.current || !numPages) return;
-
-      const scrollTop = contentRef.current!.scrollTop;
-      let accumulatedHeight = 0;
-      let newCurrentPage = 1;
-      for (let i = 0; i < pageHeights.length; i++) {
-        accumulatedHeight += pageHeights[i];
-        if (scrollTop < accumulatedHeight) {
-          newCurrentPage = i + 1;
-          break;
-        }
-      }
-
-      if (newCurrentPage !== currentPage) {
-        setCurrentPage(newCurrentPage);
-      }
-
-      updateVisiblePages();
+      updateLayout();
     };
 
     if (contentRef.current) {
@@ -167,6 +170,10 @@ const PdfViewer: React.FC<PdfViewerOptions> = ({ url }) => {
     if (!pdfInstance.current || dimensions.width <= 0) return;
     calculatePageHeights(pdfInstance.current);
   }, [dimensions, numPages]);
+
+  useEffect(() => {
+    updateLayout();
+  }, [visiblePages, dimensions]);
 
   useEffect(() => {
     if (!pdfInstance.current || dimensions.width <= 0) return;
