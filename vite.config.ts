@@ -6,6 +6,9 @@ import path from 'path';
 export default defineConfig({
   base: './',
   root: path.resolve(__dirname, 'src/renderer'),
+  optimizeDeps: {
+    include: ['node_modules/pdfjs-dist/web/pdf_viewer.mjs']
+  },
   plugins: [react(),
     viteStaticCopy({
       targets: [

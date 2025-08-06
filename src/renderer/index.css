@@ -201,14 +201,8 @@ body {
   cursor: pointer;
 }
 
-.pdf-text span {
-  position: absolute;
-  transform-origin: 0 0;
-  white-space: pre;
-  color: transparent !important;
-}
-
-.pdf-text span::selection {
-  background: rgba(255, 68, 0, 0.3) !important;
-  color: transparent !important;
+.pdf-viewer .page {
+  margin-bottom: 0.5rem;
+  position: relative;
+  overflow: hidden;
 }

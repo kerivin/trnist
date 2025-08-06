@@ -130,7 +130,7 @@ export const MainWindow = () => {
           boxSizing: 'border-box', lineHeight: '1.5rem'
         }} />;
       case "PdfViewer":
-        return <PdfViewer url={""} />;
+        return <PdfViewer url={"/home/ng/Documents/Seven Pillars of Wisdom 1922.pdf"} />;
       case "MachineTranslation":
         return <MachineTranslation />;
       default:
