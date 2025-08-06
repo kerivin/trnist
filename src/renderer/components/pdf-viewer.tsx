@@ -6,8 +6,8 @@ import {
   EventBus,
   PDFLinkService,
   PDFFindController,
+  TextLayerBuilder
 } from 'pdfjs-dist/web/pdf_viewer.mjs';
-import { PDFRenderingQueue } from 'pdfjs-dist/types/web/pdf_rendering_queue';
 // import 'pdfjs-dist/web/pdf_viewer.css';
 import pdfjsWorker from 'pdfjs-dist/build/pdf.worker.min?url';
 
@@ -20,15 +20,26 @@ interface PdfViewerProps {
 export const PdfViewer = ({ url }: PdfViewerProps) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const viewerRef = useRef<PDFJSViewer>(null);
+  const pdfDocRef = useRef<pdfjs.PDFDocumentProxy | null>(null);
   const [numPages, setNumPages] = useState<number>(0);
   const [currentPage, setCurrentPage] = useState<number>(1);
-  const [dimensions, setDimensions] = useState({ width: 0, height: 0 });
+
+  const updateScale = useCallback(() => {
+    if (!containerRef.current || !pdfDocRef.current || !viewerRef.current) return;
+
+    const containerWidth = containerRef.current.clientWidth;
+    
+    pdfDocRef.current.getPage(currentPage).then((page) => {
+      const viewport = page.getViewport({ scale: 1.5 });
+      const scale = 0.9 * containerWidth / viewport.width;
+      viewerRef.current!.currentScale = scale;
+    });
+  }, [currentPage]);
 
   useEffect(() => {
     if (!containerRef.current) return;
 
     const container = containerRef.current;
-
     const viewerElement = container.querySelector('#viewer') as HTMLDivElement;
 
     const eventBus = new EventBus();
@@ -47,46 +58,43 @@ export const PdfViewer = ({ url }: PdfViewerProps) => {
     viewerRef.current = viewer;
     linkService.setViewer(viewer);
 
-    console.log("[PDF] Loading ", url);
-
     const loadingTask = pdfjs.getDocument({
-          url: url,
-          cMapPacked: true,
-          cMapUrl: './cmaps/',
-          wasmUrl: './wasm/',
-        });
-
-    loadingTask.promise.then((pdf: pdfjs.PDFDocumentProxy) => {
-      console.log("[PDF] Ready %s pages", pdf.numPages);
-      setNumPages(pdf.numPages);
-      viewer.setDocument(pdf);
-      linkService.setDocument(pdf, null);
+      url: url,
+      cMapPacked: true,
+      cMapUrl: './cmaps/',
+      wasmUrl: './wasm/',
     });
 
-    const handleResize = () => {
-      if (viewerRef.current) {
-        viewerRef.current.currentScale = 1.2;
-      }
-    };
+    loadingTask.promise.then((pdf: pdfjs.PDFDocumentProxy) => {
+      pdfDocRef.current = pdf;
+      setNumPages(pdf.numPages);
+      
+      viewer.setDocument(pdf);
+      linkService.setDocument(pdf, null);
+      findController.setDocument(pdf);
+      
+      updateScale();
+    });
 
-    window.addEventListener('resize', handleResize);
+    const resizeObserver = new ResizeObserver(updateScale);
+    resizeObserver.observe(container);
 
     return () => {
-      window.removeEventListener('resize', handleResize);
+      resizeObserver.disconnect();
       viewer.cleanup();
       if (containerRef.current) {
         containerRef.current.innerHTML = '';
       }
     };
-  }, [url]);
+  }, [url, updateScale]);
 
-  const goToPage = (pageNumber: number) =>
-  {
+  const goToPage = (pageNumber: number) => {
     if (!viewerRef.current || !numPages) return;
 
     const validPage = Math.max(1, Math.min(pageNumber, numPages));
     viewerRef.current.currentPageNumber = validPage;
     setCurrentPage(validPage);
+    setTimeout(updateScale, 0);
   };
 
   return (
@@ -117,7 +125,7 @@ export const PdfViewer = ({ url }: PdfViewerProps) => {
       </div>
 
       <div ref={containerRef} style={{ position: 'absolute', overflow: 'auto', width: '100%', height: '100%' }}>
-        <div id="viewer" className="pdf-viewer" />
+        <div id="viewer" className="pdf-viewer" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }} />
       </div>
     </div>
   );
